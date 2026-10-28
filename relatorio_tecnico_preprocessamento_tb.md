@@ -44,8 +44,28 @@ A idade cronológica bruta em anos (`IDADE_ANOS`), quando mantida como variável
   - A Organização Mundial da Saúde (**OMS**, *Active ageing: a policy framework*, 2002) adota a linha de corte cronológica de 60 anos para definição de pessoas idosas em países em desenvolvimento.
 - **Comportamento Clínico**: Estrato de vulnerabilidade biológica extrema decorrente do fenômeno da **imunossenescência** (degradação fisiológica da imunidade mediada por linfócitos T), elevada taxa de reativação endógena de focos latentes e presença de multimorbidades crônicas cardiovasculares, metabólicas e pulmonares. A taxa de letalidade atinge **12,11%**, sendo quase dez vezes superior à de jovens.
 
-### 2.4 Categoria 'Faltante'
-- Casos em que a idade não constava no registro ou possuía sentinela não resolvida (144 casos no treino, correspondendo a apenas 0,03% da partição) foram incorporados formalmente como `'Faltante'`. Essa estratégia evita a perda arbitrária de linhas e mantém total conformidade com o tratamento padronizado no Item 4. A taxa de letalidade observada nesse grupo foi de **4,17%**.
+### 2.4 Categoria 'Faltante': Justificativa Estatística e Teoria de Little & Rubin
+
+A idade cronológica bruta não constava ou apresentava valor sentinela não resolvido em apenas **144 casos no conjunto de treino** ($N = 479.454$, correspondendo a exatamente **0,030%** da partição) e **36 casos no teste** ($N = 119.864$, **0,030%**). A decisão de manter esses registros sob a categoria explícita `'Faltante'` — em vez de descartar as linhas ou imputar valores sintéticos — apoia-se em sólidos fundamentos teóricos, metodológicos e epidemiológicos:
+
+1. **Taxonomia dos Mecanismos de Ausência (Little & Rubin, 2002, 2019)**:
+   - Na teoria clássica de análise estatística com dados faltantes (*Missing Data*) formulada por Roderick J. A. Little e Donald B. Rubin, os mecanismos geradores de incompletude são classificados formalmente em três regimes:
+     - **MCAR (*Missing Completely at Random*)**: A probabilidade de ausência é totalmente independente tanto dos valores observados quanto dos valores faltantes ($P(M \mid Y_{obs}, Y_{mis}) = P(M)$).
+     - **MAR (*Missing at Random*)**: A probabilidade de ausência depende sistematicamente de variáveis observadas no banco de dados ($Y_{obs}$), mas não do valor não observado da própria variável em si ($P(M \mid Y_{obs}, Y_{mis}) = P(M \mid Y_{obs})$).
+     - **MNAR (*Missing Not at Random* / Não Ignorável)**: A probabilidade de ausência depende diretamente do valor oculto não observado ou de fatores latentes associados ($P(M \mid Y_{obs}, Y_{mis}) \neq P(M \mid Y_{obs})$).
+   - **Ausência Informativa (*Informative Missingness*) no SINAN**: Na vigilância epidemiológica do SUS, a omissão de dados cadastrais essenciais raramente ocorre ao acaso estrito (o que violaria a hipótese de MCAR). Pacientes sem registro de idade frequentemente pertencem a estratos de extrema vulnerabilidade biopsicossocial (população em situação de rua sem documentação civil, usuários crônicos de substâncias psicoativas, pacientes admitidos em estado crítico de inconsciência ou choque séptico sem acompanhante). Portanto, o próprio fato de a idade estar ausente carrega significado prognóstico (*missingness as a signal*), enquadrando o fenômeno sob os regimes MAR ou MNAR.
+
+2. **Inadequação da Imputação Univariada Simples (Média/Mediana)**:
+   - A prática de preencher dados faltantes pela média ou mediana amostral (por exemplo, imputar a mediana de 38 anos, o que classificaria compulsoriamente os pacientes como `Adultos`), embora corriqueira em rotinas ingênuas, apresenta graves restrições formais (Rubin, 1987; Little & Rubin, 2019):
+     - **Atenuação e Distorção de Variância**: A imputação determinística pontual cria "dados artificiais" sem erro aleatório, provocando atenuação espúria da variância e covariância e subestimando os erros-padrão nas análises subsequentes.
+     - **Máscara sobre a Vulnerabilidade**: A taxa de letalidade observada empiricamente no grupo de idade `'Faltante'` no treino é de **4,17%** (6 óbitos em 144 casos). Diluir esses pacientes no contingente de adultos mascararia uma potencial falha cadastral associada a desfechos desfavoráveis.
+
+3. **Inadmissibilidade do Descarte de Linhas (*Complete-Case Analysis* / *Listwise Deletion*)**:
+   - A exclusão sumária de linhas incompletas acarretaria desperdício de registros reais de tuberculose e perda de casos raros de óbito, além de introduzir viés de atrito (*attrition bias*) caso a ausência seja não aleatória (Little & Rubin, 2019). Manter as linhas com a marcação formal atende plenamente ao princípio do projeto de não descartar observações clínicas legítimas.
+
+4. **Vantagens do *Missing-Category Approach* para Modelagem Baseada em Árvores**:
+   - Modelos baseados em partição recursiva (*Decision Trees*, *Random Forest*, *Gradient Boosting* / *LightGBM*) processam nativamente variáveis categóricas com classes dedicadas a dados faltantes (Breiman et al., 1984; Hastie, Tibshirani & Friedman, 2009). O algoritmo tem a faculdade de direcionar instâncias com valor ausente para ramificações específicas sem sofrer distorções de escala contínua.
+   - **Ausência Negligenciável e Limite de Risco**: Por representar apenas **0,03%** das partições de treino e teste, a fração de dados faltantes situa-se amplamente abaixo dos limiares de tolerância teórica (que costumam admitir até 5% sem comprometimento assintótico), assegurando que o tratamento adotado preserva integralmente a validade interna do modelo.
 
 ---
 
@@ -172,7 +192,7 @@ O cálculo foi realizado estritamente sobre o conjunto de **treino pré-balancea
 
 ---
 
-## 7. Referências Bibliográficas Normativas
+## 7. Referências Bibliográficas Normativas e Metodológicas
 
 1. BRASIL. **Lei nº 8.069, de 13 de julho de 1990**. Dispõe sobre o Estatuto da Criança e do Adolescente e dá outras providências. *Diário Oficial da União*, Brasília, DF, 16 jul. 1990. Disponível em: <http://www.planalto.gov.br/ccivil_03/leis/l8069.htm>.
 2. BRASIL. **Lei nº 10.741, de 1º de outubro de 2003**. Dispõe sobre o Estatuto da Pessoa Idosa e dá outras providências (redação dada pela Lei nº 14.423, de 22 de julho de 2022). *Diário Oficial da União*, Brasília, DF, 3 out. 2003. Disponível em: <http://www.planalto.gov.br/ccivil_03/leis/2003/l10.741.htm>.
@@ -183,3 +203,7 @@ O cálculo foi realizado estritamente sobre o conjunto de **treino pré-balancea
 7. WORLD HEALTH ORGANIZATION (WHO). **Recognizing adolescence: WHO guideline on assessing and managing children at primary health-care facilities**. Geneva: World Health Organization, 2014.
 8. WORLD HEALTH ORGANIZATION (WHO). **Active ageing: a policy framework**. Geneva: World Health Organization, 2002.
 9. WORLD HEALTH ORGANIZATION (WHO). **Global Tuberculosis Report 2023**. Geneva: World Health Organization, 2023.
+10. LITTLE, Roderick J. A.; RUBIN, Donald B. **Statistical Analysis with Missing Data**. 3. ed. Hoboken, NJ: John Wiley & Sons, 2019.
+11. RUBIN, Donald B. **Multiple Imputation for Nonresponse in Surveys**. New York: John Wiley & Sons, 1987.
+12. SCHAFER, Joseph L.; GRAHAM, John W. Missing data: our view of the state of the art. **Psychological Methods**, v. 7, n. 2, p. 147-177, 2002.
+13. BREIMAN, Leo; FRIEDMAN, Jerome H.; OLSHEN, Richard A.; STONE, Charles J. **Classification and Regression Trees**. Belmont, CA: Wadsworth International Group, 1984.

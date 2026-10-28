@@ -805,8 +805,9 @@ A variável contínua `IDADE_ANOS` é discretizada em três faixas etárias fund
 3. **Idosos (60 anos ou mais)**:
    - *Fundamentação Legal*: Estatuto da Pessoa Idosa (**Lei Federal nº 10.741/2003**, art. 1º, alterado pela Lei nº 14.423/2022) e Política Nacional do Idoso (Lei Federal nº 8.842/1994, art. 2º).
    - *Perfil Clínico*: Grupo de altíssima vulnerabilidade biológica decorrente de imunossenescência e multimorbidade crônica, com letalidade de 12,11%.
-4. **Faltante**:
-   - Registros com idade ausente ou sentinela no momento do registro são preservados e rotulados como `'Faltante'`, mantendo congruência com a política do Item 4.
+4. **Faltante (Fundamentação Estatística segundo Little & Rubin, 2019)**:
+   - Registros com idade ausente ou sentinela no momento do registro (0,03% da coorte) são preservados e rotulados como `'Faltante'`.
+   - *Justificativa Teórica*: Segundo a taxonomia de Little & Rubin (2002, 2019), a omissão de dados cadastrais no SUS configura ausência informativa (MAR/MNAR), refletindo populações vulneráveis ou atendimentos emergenciais graves. Imputar média/mediana atenuaria artificialmente a variância e mascararia esse sinal clínico, enquanto o *missing-category approach* permite que modelos baseados em árvores aprendam regras exclusivas para esses registros sem perda de linhas.
 
 A coluna contínua `IDADE_ANOS` é descartada, sendo substituída por `FAIXA_ETARIA` no pool de preditoras.
 """
