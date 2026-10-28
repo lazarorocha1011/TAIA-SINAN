@@ -1,0 +1,4 @@
+/.agents/*
+TEST_INFRA.md
+TEST_READY.md
+__pycache__/

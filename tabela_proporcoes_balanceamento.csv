@@ -1,0 +1,4 @@
+﻿Partição,Cura (N),Cura (%),Óbito por TB (N),Óbito por TB (%),Total
+Treino (Original),455019,94.90%,24435,5.10%,479454
+Treino (Pós-balanceamento),24435,50.00%,24435,50.00%,48870
+Teste (Isolado),113755,94.90%,6109,5.10%,119864

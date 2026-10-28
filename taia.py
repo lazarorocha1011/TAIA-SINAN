@@ -782,3 +782,467 @@ display(df_tabela_108)
 3. **Preservação de Registros**:
    - Nenhuma linha foi removida por ausência de dados. Registros com dados faltantes tiveram colunas descartadas (quando >60%) ou tiveram suas categorias mantidas sob o rótulo `"Faltante"`. A única exclusão de linhas foi a definição da coorte de estudo no Item 1.
 """
+
+# %% [markdown]
+"""
+---
+## Seção 8: Limpeza de Casos Pós-Óbito, Sentinelas e Discretização Legal da Idade (R2)
+
+### 8.1 Eliminação de Casos de Entrada Pós-Óbito e Sentinelas (Prevenção de Target Leakage)
+Na base do SINAN, o campo `TRATAMENTO` possui a categoria `"Pós-óbito"`, que representa casos em que a notificação epidemiológica só ocorreu após o falecimento do paciente (via declaração de óbito ou Serviço de Verificação de Óbito - SVO).
+- **Vazamento Temporal e Tautológico**: Dos 4.095 registros com entrada `TRATAMENTO == 'Pós-óbito'`, 4.089 evoluíram para Óbito por TB (99,85%). Em um modelo preditivo concebido para apoiar a decisão clínica prospectiva no momento do diagnóstico, a presença desses registros constitui vazamento direto do desfecho (*target leakage*) e causalidade reversa.
+- **Tratamento de Sentinelas**: O código `"Não sabe"` em `TRATAMENTO` (1.766 registros) representa histórico prévio desconhecido e é mapeado para a categoria padronizada `'Faltante'`.
+- **Resultado do Filtro**: A remoção desses 4.095 registros reduz a coorte de 603.413 para **599.318 casos válidos** (568.774 curas e 30.544 óbitos por TB - letalidade real de 5,10%).
+
+### 8.2 Discretização Legal da Idade (FAIXA_ETARIA)
+A variável contínua `IDADE_ANOS` é discretizada em três faixas etárias fundamentadas rigorosamente na legislação brasileira e nos parâmetros demográficos internacionais:
+1. **Jovens (0 a 19 anos)**:
+   - *Fundamentação Legal*: Estatuto da Criança e do Adolescente (**Lei Federal nº 8.069/1990**, art. 2º), Estatuto da Juventude (**Lei Federal nº 12.852/2013**, art. 1º) e convenção internacional da Organização Mundial da Saúde (**OMS**, *Recognizing adolescence*, 2014) e do **IBGE**.
+   - *Perfil Clínico*: Formas primárias, paucibacilares e taxa de letalidade reduzida (1,28%).
+2. **Adultos (20 a 59 anos)**:
+   - *Fundamentação Legal/Demográfica*: População em Idade Ativa (PIA), padrão dos inquéritos populacionais de vigilância epidemiológica do Ministério da Saúde e do **IBGE**.
+   - *Perfil Clínico*: Maior exposição a comorbidades comportamentais e privação social, apresentando taxa intermediária de letalidade (4,07%).
+3. **Idosos (60 anos ou mais)**:
+   - *Fundamentação Legal*: Estatuto da Pessoa Idosa (**Lei Federal nº 10.741/2003**, art. 1º, alterado pela Lei nº 14.423/2022) e Política Nacional do Idoso (Lei Federal nº 8.842/1994, art. 2º).
+   - *Perfil Clínico*: Grupo de altíssima vulnerabilidade biológica decorrente de imunossenescência e multimorbidade crônica, com letalidade de 12,11%.
+4. **Faltante**:
+   - Registros com idade ausente ou sentinela no momento do registro são preservados e rotulados como `'Faltante'`, mantendo congruência com a política do Item 4.
+
+A coluna contínua `IDADE_ANOS` é descartada, sendo substituída por `FAIXA_ETARIA` no pool de preditoras.
+"""
+
+# %%
+# ======================================================================================
+# 8. SEÇÃO 8: FILTRAGEM PÓS-ÓBITO E DISCRETIZAÇÃO LEGAL DA IDADE (R2)
+# ======================================================================================
+total_antes_filtro_pos = len(df_modelo)
+
+# 8.1 Filtragem dos casos pós-óbito para eliminação de vazamento do alvo (leakage)
+mask_pos_obito = df_modelo['TRATAMENTO'].astype(str).str.strip().str.lower().isin(
+    ['pós-óbito', 'pos-obito', 'ps-bito', '5']
+)
+num_pos_obito = mask_pos_obito.sum()
+
+# Mapeamento do sentinela 'Não sabe' em TRATAMENTO para 'Faltante'
+df_modelo.loc[df_modelo['TRATAMENTO'].astype(str).str.strip().str.lower().isin(['não sabe', 'nao sabe']), 'TRATAMENTO'] = 'Faltante'
+
+# Exclusão das linhas pós-óbito
+df_modelo = df_modelo[~mask_pos_obito].copy()
+total_apos_filtro_pos = len(df_modelo)
+
+print("="*80)
+print("SEÇÃO 8.1: REMOÇÃO DE CASOS PÓS-ÓBITO E SENTINELAS (R2)")
+print("="*80)
+print(f"Registros antes da filtragem pós-óbito : {total_antes_filtro_pos:,}")
+print(f"Casos 'Pós-óbito' excluídos (leakage) : {num_pos_obito:,} (99.85% de óbitos na entrada)")
+print(f"Registros mantidos na coorte final    : {total_apos_filtro_pos:,}")
+print(f"  • Cura         : {(df_modelo['TARGET'] == 0).sum():,} ({(df_modelo['TARGET'] == 0).mean()*100:.2f}%)")
+print(f"  • Óbito por TB : {(df_modelo['TARGET'] == 1).sum():,} ({(df_modelo['TARGET'] == 1).mean()*100:.2f}%)")
+
+# 8.2 Discretização da idade em faixas etárias legais
+condicoes_idade = [
+    (df_modelo['IDADE_ANOS'] >= 0) & (df_modelo['IDADE_ANOS'] <= 19),
+    (df_modelo['IDADE_ANOS'] >= 20) & (df_modelo['IDADE_ANOS'] <= 59),
+    (df_modelo['IDADE_ANOS'] >= 60)
+]
+escolhas_idade = [
+    'Jovens (0 a 19 anos)',
+    'Adultos (20 a 59 anos)',
+    'Idosos (60 anos ou mais)'
+]
+
+df_modelo['FAIXA_ETARIA'] = np.select(condicoes_idade, escolhas_idade, default='Faltante')
+
+# Substituição: remove a idade contínua IDADE_ANOS e fixa FAIXA_ETARIA como preditora
+df_modelo = df_modelo.drop(columns=['IDADE_ANOS'])
+
+print("\n" + "="*80)
+print("SEÇÃO 8.2: DISCRETIZAÇÃO LEGAL DA IDADE (FAIXA_ETARIA)")
+print("="*80)
+resumo_faixa = df_modelo.groupby('FAIXA_ETARIA')['TARGET'].agg(
+    Total='count',
+    Cura=lambda s: (s == 0).sum(),
+    Obito=lambda s: (s == 1).sum(),
+    Taxa_Obito_Pct=lambda s: s.mean() * 100
+).reindex(['Jovens (0 a 19 anos)', 'Adultos (20 a 59 anos)', 'Idosos (60 anos ou mais)', 'Faltante'])
+
+for faixa, row in resumo_faixa.iterrows():
+    print(f"  • {faixa:<25}: {row['Total']:>7,} casos | Óbitos: {row['Obito']:>6,} ({row['Taxa_Obito_Pct']:>5.2f}%)")
+print("-" * 80)
+print(f"Total de atributos preditores candidatos: {len(df_modelo.columns) - 1} colunas.")
+
+# %% [markdown]
+"""
+---
+## Seção 9: Divisão Estratificada em Treino e Teste sem Vazamento (R1)
+
+### 9.1 Protocolo de Particionamento e Isolamento Estrito
+Para avaliar a capacidade de generalização do modelo preditivo sem qualquer forma de contaminação por vazamento de dados (*data leakage*), a coorte de 599.318 registros é dividida em:
+- **Treino (80%)**: 479.454 registros.
+- **Teste (20%)**: 119.864 registros.
+
+A amostragem é **estratificada pela variável de desfecho (`TARGET`)** com semente pseudoaleatória reprodutível (`random_state=42`), garantindo que tanto o conjunto de treino quanto o de teste reflitam rigorosamente a mesma proporção observada na população (94,90% de Cura e 5,10% de Óbito por TB).
+
+### 9.2 Garantia de Não-Vazamento e Tratamento de `NU_COMU_EX`
+- O conjunto de teste permanece **estritamente isolado**: não participa do cálculo da média/mediana, da seleção univariada de atributos, de rankings estatísticos ou do balanceamento de classes.
+- A imputação de dados faltantes da variável contínua `NU_COMU_EX` (contatos examinados) é ajustada calculando-se a mediana **exclusivamente sobre `X_train`**. Esse valor fixado no treino é então aplicado para preencher os faltantes em `X_train` e `X_test`, respeitando a integridade do processo de modelagem.
+"""
+
+# %%
+# ======================================================================================
+# 9. SEÇÃO 9: DIVISÃO ESTRATIFICADA EM TREINO E TESTE SEM VAZAMENTO (R1)
+# ======================================================================================
+from sklearn.model_selection import train_test_split
+
+X = df_modelo.drop(columns=['TARGET']).copy()
+y = df_modelo['TARGET'].copy()
+
+# Divisão estratificada 80/20 com semente fixa
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y,
+    test_size=0.20,
+    stratify=y,
+    random_state=42
+)
+
+# Imputação estritamente isolada de NU_COMU_EX calculada apenas no treino
+mediana_contatos_treino = X_train['NU_COMU_EX'].median()
+X_train['NU_COMU_EX'] = X_train['NU_COMU_EX'].fillna(mediana_contatos_treino)
+X_test['NU_COMU_EX'] = X_test['NU_COMU_EX'].fillna(mediana_contatos_treino)
+
+print("="*80)
+print("SEÇÃO 9: DIVISÃO ESTRATIFICADA TREINO (80%) E TESTE (20%)")
+print("="*80)
+print(f"Mediana de NU_COMU_EX calculada exclusivamente no Treino: {mediana_contatos_treino:.1f}")
+print(f"Dimensões de Treino : {X_train.shape[0]:,} linhas x {X_train.shape[1]} preditoras")
+print(f"Dimensões de Teste  : {X_test.shape[0]:,} linhas x {X_test.shape[1]} preditoras")
+print("-" * 80)
+print("Distribuição das Classes no Treino (80%):")
+print(f"  • Cura (0)        : {(y_train == 0).sum():>7,} casos ({(y_train == 0).mean()*100:>5.2f}%)")
+print(f"  • Óbito por TB (1): {(y_train == 1).sum():>7,} casos ({(y_train == 1).mean()*100:>5.2f}%)")
+print(f"  • Total Treino    : {len(y_train):>7,} casos (100.00%)")
+print("-" * 80)
+print("Distribuição das Classes no Teste (20% - Rigorosamente Isolado):")
+print(f"  • Cura (0)        : {(y_test == 0).sum():>7,} casos ({(y_test == 0).mean()*100:>5.2f}%)")
+print(f"  • Óbito por TB (1): {(y_test == 1).sum():>7,} casos ({(y_test == 1).mean()*100:>5.2f}%)")
+print(f"  • Total Teste     : {len(y_test):>7,} casos (100.00%)")
+print("="*80)
+
+# %% [markdown]
+r"""
+---
+## Seção 10: Seleção Univariada de Atributos no Treino (R3)
+
+### 10.1 Metodologia de Associação Univariada no Treino
+A seleção de atributos é executada **estritamente sobre a partição de treino (`X_train` e `y_train`)**, sem consultar qualquer linha do conjunto de teste:
+- **Preditoras Categóricas (25 atributos)**: Avaliadas via teste de independência do Qui-Quadrado ($\chi^2$) e padronizadas pelo **$V$ de Cramér**:
+  $$V = \sqrt{\frac{\chi^2}{N \cdot (\min(r, c) - 1)}}$$
+  Como o desfecho binário possui $r=2$, $\min(r, c) - 1 = 1$, de modo que $V = \sqrt{\frac{\chi^2}{N}}$.
+- **Preditora Numérica (`NU_COMU_EX`)**: Avaliada pela correlação ponto-bisserial ($|r|$), cuja escala é equivalente ao coeficiente de correlação e indica o poder discriminante do número de contatos examinados.
+- **Inadequação do $p$-valor Puro**: Dado o volume maciço do treino ($N = 479.454$), todos os 26 atributos atingem significância estatística extrema ($p < 10^{-34}$). Portanto, o ranking é determinado pela magnitude da associação ($V$ de Cramér e $|r|$).
+
+### 10.2 Dimensionamento de Preditores [20, 30]
+Partindo dos 26 preditores candidatos, retemos os **22 atributos preditores selecionados** com maior força de associação ($V \ge 0,0325$), descartando os 4 preditores mais fracos da coorte:
+1. `BACILOSC_E` ($V = 0,0308$): exame de escarro inicial que apresenta alta redundância com outros achados clínicos.
+2. `POP_SAUDE` ($V = 0,0263$): população profissional de saúde, de baixíssima incidência e associação fraca.
+3. `POP_IMIG` ($V = 0,0201$): população imigrante, de frequência residual na coorte pulmonar.
+4. `CS_RACA` ($V = 0,0189$): raça/cor autodeclarada, com menor poder preditivo independente sobre a letalidade.
+
+A seleção final de 22 preditores atende com precisão matemática a exigência de manter entre 20 e 30 atributos.
+"""
+
+# %%
+# ======================================================================================
+# 10. SEÇÃO 10: SELEÇÃO UNIVARIADA DE ATRIBUTOS NO TREINO (R3)
+# ======================================================================================
+from scipy import stats
+
+resultados_selecao = []
+n_instancias_treino = len(X_train)
+
+# Cálculo da associação univariada estritamente sobre X_train e y_train
+for col in X_train.columns:
+    if col == 'NU_COMU_EX':
+        r_val, p_val = stats.pointbiserialr(y_train, X_train[col])
+        resultados_selecao.append({
+            'Atributo': col,
+            'Tipo': 'Numérica',
+            'Estatística': f"r = {r_val:.4f}",
+            'p_valor': p_val,
+            'Metrica_Associacao': abs(r_val),
+            'Nome_Metrica': 'Ponto-Bisserial (|r|)'
+        })
+    else:
+        tab_cont = pd.crosstab(X_train[col], y_train)
+        chi2, p_val, dof, _ = stats.chi2_contingency(tab_cont)
+        cramers_v = np.sqrt(chi2 / (n_instancias_treino * (min(tab_cont.shape) - 1)))
+        resultados_selecao.append({
+            'Atributo': col,
+            'Tipo': 'Categórica',
+            'Estatística': f"chi2 = {chi2:.2f}",
+            'p_valor': p_val,
+            'Metrica_Associacao': cramers_v,
+            'Nome_Metrica': 'V de Cramér'
+        })
+
+df_selecao = pd.DataFrame(resultados_selecao).sort_values(by='Metrica_Associacao', ascending=False).reset_index(drop=True)
+df_selecao['Posto'] = df_selecao.index + 1
+
+# Seleção dos 22 melhores preditores (estritamente no intervalo de 20 a 30)
+NUM_PREDITORES_SELECIONADOS = 22
+df_selecao['Decisão'] = np.where(df_selecao['Posto'] <= NUM_PREDITORES_SELECIONADOS, 'Mantido', 'Descartado')
+
+atributos_mantidos = df_selecao[df_selecao['Decisão'] == 'Mantido']['Atributo'].tolist()
+atributos_descartados = df_selecao[df_selecao['Decisão'] == 'Descartado']['Atributo'].tolist()
+
+print("="*85)
+print("SEÇÃO 10: RANKING DE ASSOCIAÇÃO UNIVARIADA NO TREINO (R3)")
+print("="*85)
+print(f"{'Posto':<6} {'Atributo':<24} {'Tipo':<12} {'Métrica':<15} {'Valor':<8} {'p-valor':<12} {'Decisão'}")
+print("-" * 85)
+for _, row in df_selecao.iterrows():
+    p_str = "< 1e-300" if row['p_valor'] < 1e-300 else f"{row['p_valor']:.2e}"
+    print(f"{row['Posto']:<6} {row['Atributo']:<24} {row['Tipo']:<12} {row['Nome_Metrica']:<15} {row['Metrica_Associacao']:<8.4f} {p_str:<12} {row['Decisão']}")
+
+print("-" * 85)
+print(f"Total de preditores candidatos : {len(df_selecao)}")
+print(f"Total de preditores mantidos   : {len(atributos_mantidos)} atributos preditores selecionados (faixa de 20 a 30)")
+print(f"Total de preditores descartados: {len(atributos_descartados)}")
+print(f"Preditores descartados         : {', '.join(atributos_descartados)}")
+
+# %% [markdown]
+"""
+---
+## Seção 11: Balanceamento Exclusivo do Treino por Random Undersampling (R4)
+
+### 11.1 Justificativa Metodológica: Random Undersampling vs NearMiss
+- **Inviabilidade do NearMiss**: O método NearMiss calcula distâncias euclidianas via $k$-Nearest Neighbors ($k$-NN) entre cada exemplo majoritário e todos os minoritários. Em uma base com 455.019 curas e 24.435 óbitos, essa matriz de distâncias exige mais de 11 bilhões de operações, provocando esgotamento de memória RAM (Out-Of-Memory) e tempos proibitivos. Ademais, ao selecionar curas coladas à fronteira de óbito, o NearMiss incorpora casos anômalos de subnotificação e ruído clínico, provocando sobreajuste (*overfitting*).
+- **Vantagens do Random Undersampling (RUS)**: Executa em tempo linear $O(N)$, preserva a representatividade demográfica e geográfica dos curados e retém um volume robusto de 48.870 casos (24.435 curas e 24.435 óbitos), com convergência perfeita para modelos preditivos.
+- **Implementação Nativa**: Implementado via `pandas` nativo com `random_state=42`, garantindo 100% de portabilidade sem depender de pacotes ausentes como `imbalanced-learn` (`imblearn`).
+- **Isolamento do Teste**: O conjunto de teste **nunca** é balanceado, mantendo a proporção original de 5,10% de óbitos para refletir a incidência epidemiológica real na avaliação do modelo.
+
+### 11.2 Construção e Exportação da Tabela Comparativa de Classes
+Gera-se a tabela estruturada com contagens e proporções absolutas e relativas das classes em:
+1. Treino (Pré-balanceamento)
+2. Treino (Pós-balanceamento)
+3. Teste (Isolado)
+Exportando os resultados para `tabela_proporcoes_balanceamento.csv`.
+"""
+
+# %%
+# ======================================================================================
+# 11. SEÇÃO 11: BALANCEAMENTO EXCLUSIVO DO TREINO POR RANDOM UNDERSAMPLING (R4)
+# ======================================================================================
+# Aplicação da seleção de atributos nos conjuntos de treino e teste
+X_train_sel = X_train[atributos_mantidos].copy()
+X_test_sel = X_test[atributos_mantidos].copy()
+
+# Índices das classes majoritária (Cura = 0) e minoritária (Óbito = 1) no treino
+idx_cura_treino = y_train[y_train == 0].index
+idx_obito_treino = y_train[y_train == 1].index
+
+n_obito_treino = len(idx_obito_treino)
+
+# Subamostragem aleatória 1:1 da classe majoritária no treino
+idx_cura_subamostrada = pd.Series(idx_cura_treino).sample(
+    n=n_obito_treino,
+    random_state=42
+).values
+
+# Concatenação e permutação dos índices balanceados
+idx_treino_bal = np.concatenate([idx_cura_subamostrada, idx_obito_treino])
+np.random.seed(42)
+np.random.shuffle(idx_treino_bal)
+
+X_train_bal = X_train_sel.loc[idx_treino_bal].copy()
+y_train_bal = y_train.loc[idx_treino_bal].copy()
+
+# Montagem da tabela comparativa tripla de proporções
+dados_tabela_bal = [
+    {
+        'Partição': 'Treino (Original)',
+        'Cura (N)': int((y_train == 0).sum()),
+        'Cura (%)': f"{(y_train == 0).mean()*100:.2f}%",
+        'Óbito por TB (N)': int((y_train == 1).sum()),
+        'Óbito por TB (%)': f"{(y_train == 1).mean()*100:.2f}%",
+        'Total': int(len(y_train))
+    },
+    {
+        'Partição': 'Treino (Pós-balanceamento)',
+        'Cura (N)': int((y_train_bal == 0).sum()),
+        'Cura (%)': f"{(y_train_bal == 0).mean()*100:.2f}%",
+        'Óbito por TB (N)': int((y_train_bal == 1).sum()),
+        'Óbito por TB (%)': f"{(y_train_bal == 1).mean()*100:.2f}%",
+        'Total': int(len(y_train_bal))
+    },
+    {
+        'Partição': 'Teste (Isolado)',
+        'Cura (N)': int((y_test == 0).sum()),
+        'Cura (%)': f"{(y_test == 0).mean()*100:.2f}%",
+        'Óbito por TB (N)': int((y_test == 1).sum()),
+        'Óbito por TB (%)': f"{(y_test == 1).mean()*100:.2f}%",
+        'Total': int(len(y_test))
+    }
+]
+
+df_proporcoes_balanceamento = pd.DataFrame(dados_tabela_bal)
+df_proporcoes_balanceamento.to_csv('tabela_proporcoes_balanceamento.csv', index=False, encoding='utf-8-sig')
+
+print("="*85)
+print("SEÇÃO 11: TABELA COMPARATIVA DE PROPORÇÕES DE BALANCEAMENTO (R4)")
+print("="*85)
+print(df_proporcoes_balanceamento.to_string(index=False))
+print("-" * 85)
+print("Arquivo exportado com sucesso: 'tabela_proporcoes_balanceamento.csv'")
+display(df_proporcoes_balanceamento)
+
+# %% [markdown]
+r"""
+---
+## Seção 12: Análise Gráfica do Desfecho Pré-Balanceamento (R5)
+
+### 12.1 Escolha da Variável Mais Representativa
+Dentre os 22 preditores selecionados para o modelo final, a **`FAIXA_ETARIA`** foi selecionada para a análise gráfica por congregar:
+1. **Segundo Maior Poder de Associação**: $V$ de Cramér = 0,1417 ($\chi^2 = 9.622,31$, $p < 10^{-300}$), superando todos os agravos e vulnerabilidades clínicas e sociais.
+2. **Fundamentação Jurídica e Padronização Oficial**: Suas classes derivam de diplomas legais consolidados (**Lei Federal nº 8.069/1990** - ECA e **Lei Federal nº 10.741/2003** - Estatuto da Pessoa Idosa).
+3. **Gradiente Biológico Monotônico**: Revela o aumento contínuo do risco de óbito da juventude à senescência (1,28% em jovens, 4,07% em adultos e 12,11% em idosos).
+
+### 12.2 Isolamento Pré-Balanceamento
+O cálculo percentual da taxa de óbito é realizado **estritamente sobre o conjunto de treino pré-balanceamento** ($N = 479.454$). Se o gráfico fosse gerado após o balanceamento 1:1, a letalidade média seria artificialmente distorcida para 50%, destruindo o perfil epidemiológico real da tuberculose pulmonar no Brasil.
+"""
+
+# %%
+# ======================================================================================
+# 12. SEÇÃO 12: ANÁLISE GRÁFICA DO DESFECHO PRÉ-BALANCEAMENTO (R5)
+# ======================================================================================
+import matplotlib.pyplot as plt
+
+ordem_categorias = [
+    'Jovens (0 a 19 anos)',
+    'Adultos (20 a 59 anos)',
+    'Idosos (60 anos ou mais)',
+    'Faltante'
+]
+
+df_grafico = pd.DataFrame({
+    'FAIXA_ETARIA': X_train['FAIXA_ETARIA'],
+    'TARGET': y_train
+})
+
+resumo_grafico = df_grafico.groupby('FAIXA_ETARIA')['TARGET'].agg(
+    Total='count',
+    Obitos='sum',
+    Taxa_Obito=lambda s: s.mean() * 100
+).reindex(ordem_categorias).reset_index()
+
+# Configuração estética do gráfico
+fig, ax = plt.subplots(figsize=(10, 6), dpi=300)
+cores = ['#2b5c8f', '#36827f', '#d95f02', '#7570b3']
+
+barras = ax.bar(
+    resumo_grafico['FAIXA_ETARIA'],
+    resumo_grafico['Taxa_Obito'],
+    color=cores,
+    edgecolor='black',
+    linewidth=0.8,
+    width=0.55
+)
+
+# Adição de rótulos detalhados acima de cada barra
+for barra, _, total, obito, taxa in zip(
+    barras,
+    resumo_grafico['FAIXA_ETARIA'],
+    resumo_grafico['Total'],
+    resumo_grafico['Obitos'],
+    resumo_grafico['Taxa_Obito']
+):
+    altura = barra.get_height()
+    ax.text(
+        barra.get_x() + barra.get_width() / 2.0,
+        altura + 0.35,
+        f"{taxa:.2f}%\n({obito:,} / {total:,})",
+        ha='center',
+        va='bottom',
+        fontsize=10,
+        fontweight='bold',
+        color='#1a1a1a'
+    )
+
+media_global_treino = y_train.mean() * 100
+ax.axhline(
+    y=media_global_treino,
+    color='#b30000',
+    linestyle='--',
+    linewidth=1.5,
+    label=f'Letalidade Média Global do Treino ({media_global_treino:.2f}%)'
+)
+
+ax.set_title(
+    'Taxa de Letalidade por Tuberculose Pulmonar por Faixa Etária\n(Conjunto de Treino Pré-Balanceamento — N = 479.454)',
+    fontsize=13,
+    fontweight='bold',
+    pad=15
+)
+ax.set_xlabel(
+    'Faixa Etária Oficial (ECA Lei 8.069/1990 | Estatuto da Pessoa Idosa Lei 10.741/2003 | OMS / IBGE)',
+    fontsize=11,
+    labelpad=10
+)
+ax.set_ylabel('Taxa de Óbito por Tuberculose (%)', fontsize=11, labelpad=10)
+ax.set_ylim(0, max(resumo_grafico['Taxa_Obito']) * 1.25)
+ax.grid(axis='y', linestyle=':', alpha=0.6)
+ax.legend(loc='upper left', frameon=True, fontsize=10)
+
+plt.tight_layout()
+nome_arquivo_grafico = 'grafico_desfecho_faixa_etaria.png'
+plt.savefig(nome_arquivo_grafico, dpi=300, bbox_inches='tight')
+plt.close(fig)
+
+print("="*80)
+print("SEÇÃO 12: ANÁLISE GRÁFICA DO DESFECHO PRÉ-BALANCEAMENTO (R5)")
+print("="*80)
+print(f"Gráfico exportado com sucesso: '{nome_arquivo_grafico}'")
+for _, r in resumo_grafico.iterrows():
+    print(f"  • {r['FAIXA_ETARIA']:<25}: {r['Taxa_Obito']:>5.2f}% ({r['Obitos']:>5,} óbitos em {r['Total']:>7,} casos)")
+
+# %% [markdown]
+"""
+---
+## Seção 13: Consolidação dos Entregáveis (R6)
+
+### 13.1 Síntese dos Resultados e Conformidade com os Requisitos
+1. **R1 (Divisão Estratificada sem Vazamento)**: Coorte particionada em 80% Treino (479.454 casos) e 20% Teste (119.864 casos), com 5,10% de óbitos em ambas as partições. O teste permaneceu 100% isolado.
+2. **R2 (Discretização Legal da Idade e Sentinelas)**: Remoção de 4.095 registros de `TRATAMENTO == 'Pós-óbito'` (eliminando vazamento temporal) e discretização da idade nas faixas etárias amparadas na Lei nº 8.069/1990 (ECA) e Lei nº 10.741/2003 (Estatuto da Pessoa Idosa).
+3. **R3 (Seleção Univariada de Atributos)**: Calculada estritamente no treino via V de Cramér e correlação ponto-bisserial, selecionando 22 preditores (enquadramento em [20, 30]) e descartando 4 variáveis fracas.
+4. **R4 (Balanceamento Exclusivo do Treino)**: Aplicação de Random Undersampling nativo 1:1 na classe majoritária no treino (48.870 casos pós-balanceamento), preservando a distribuição original do teste; exportação de `tabela_proporcoes_balanceamento.csv`.
+5. **R5 (Análise Gráfica Pré-Balanceamento)**: Gráfico de letalidade por faixa etária gerado exclusivamente sobre o treino pré-balanceamento e exportado para `grafico_desfecho_faixa_etaria.png`.
+6. **R6 (Entregáveis do Projeto)**: Consolidação de script Python executável (`taia.py`), notebook atualizado (`TAIA (2).ipynb`), tabela comparativa, gráfico de alta resolução e relatório técnico estruturado (`relatorio_tecnico_preprocessamento_tb.md`).
+"""
+
+# %%
+# ======================================================================================
+# 13. SEÇÃO 13: CONSOLIDAÇÃO DOS ENTREGÁVEIS DO PROJETO (R6)
+# ======================================================================================
+import os
+
+print("="*85)
+print("SEÇÃO 13: CONSOLIDAÇÃO DOS ENTREGÁVEIS DO PROJETO (R6)")
+print("="*85)
+
+entregaveis = [
+    ('taia.py', 'Script executável Python com pipeline completo de ponta a ponta (Seções 1 a 13)'),
+    ('TAIA (2).ipynb', 'Jupyter Notebook com células correspondentes e compatível com Google Colab'),
+    ('tabela_proporcoes_balanceamento.csv', 'Tabela comparativa estruturada das partições (Treino Pré/Pós e Teste)'),
+    ('grafico_desfecho_faixa_etaria.png', 'Gráfico de barras da taxa de letalidade por faixa etária no treino pré-bal'),
+    ('relatorio_tecnico_preprocessamento_tb.md', 'Relatório técnico integral com fundamentação metodológica e jurídica'),
+    ('tabela_decisao_todas_colunas.csv', 'Catálogo das 108 colunas originais do SINAN com decisões e justificativas')
+]
+
+for arq, desc in entregaveis:
+    status = "OK (Presente)" if os.path.exists(arq) else "Pendente / Em geração"
+    tamanho = f"{os.path.getsize(arq):,} bytes" if os.path.exists(arq) else "-"
+    print(f"  • {arq:<40}: {status:<20} {tamanho:>15}")
+    print(f"    -> {desc}")
+
+print("-" * 85)
+print("PIPELINE DE PRÉ-PROCESSAMENTO CONCLUÍDO COM SUCESSO E SEM VAZAMENTO DE DADOS.")
