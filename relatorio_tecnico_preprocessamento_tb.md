@@ -4,6 +4,7 @@
 **Desfecho Analítico**: Predição Binária de Desfecho Clínico (`Cura = 0` vs. `Óbito por Tuberculose = 1`)  
 **Data**: Outubro de 2026  
 **Ambiente Operacional**: Python 3.14 / `pandas`, `scikit-learn`, `scipy`, `matplotlib`  
+**Equipe**: Kevin Luís Alves de Lima, Lázaro Felipe da Rocha Santos
 
 ---
 
