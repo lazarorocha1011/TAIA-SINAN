@@ -65,9 +65,12 @@ A idade cronológica bruta não constava ou apresentava valor sentinela não res
 
 1. **Taxonomia dos Mecanismos de Ausência (Little & Rubin, 2002, 2019)**:
    - Na teoria clássica de análise estatística com dados faltantes (*Missing Data*) formulada por Roderick J. A. Little e Donald B. Rubin, os mecanismos geradores de incompletude são classificados formalmente em três regimes:
-     - **MCAR (*Missing Completely at Random*)**: A probabilidade de ausência é totalmente independente tanto dos valores observados quanto dos valores faltantes ($P(M \mid Y_{obs}, Y_{mis}) = P(M)$).
-     - **MAR (*Missing at Random*)**: A probabilidade de ausência depende sistematicamente de variáveis observadas no banco de dados ($Y_{obs}$), mas não do valor não observado da própria variável em si ($P(M \mid Y_{obs}, Y_{mis}) = P(M \mid Y_{obs})$).
-     - **MNAR (*Missing Not at Random* / Não Ignorável)**: A probabilidade de ausência depende diretamente do valor oculto não observado ou de fatores latentes associados ($P(M \mid Y_{obs}, Y_{mis}) \neq P(M \mid Y_{obs})$).
+     - **MCAR (*Missing Completely at Random* / Faltante Completamente ao Acaso)**: A probabilidade de ausência é totalmente independente tanto dos valores observados quanto dos valores faltantes:
+       $$P(M \mid Y_{\text{obs}}, Y_{\text{mis}}) = P(M)$$
+     - **MAR (*Missing at Random* / Faltante ao Acaso)**: A probabilidade de ausência depende das variáveis observadas no banco de dados, mas não do valor não observado da própria variável em si:
+       $$P(M \mid Y_{\text{obs}}, Y_{\text{mis}}) = P(M \mid Y_{\text{obs}})$$
+     - **MNAR (*Missing Not at Random* / Não Ignorável)**: A probabilidade de ausência depende diretamente do valor oculto não observado ou de fatores de risco latentes:
+       $$P(M \mid Y_{\text{obs}}, Y_{\text{mis}}) \neq P(M \mid Y_{\text{obs}})$$
    - **Ausência Informativa (*Informative Missingness*) no SINAN**: Na vigilância epidemiológica do SUS, a omissão de dados cadastrais essenciais raramente ocorre ao acaso estrito (o que violaria a hipótese de MCAR). Pacientes sem registro de idade frequentemente pertencem a estratos de extrema vulnerabilidade biopsicossocial (população em situação de rua sem documentação civil, usuários crônicos de substâncias psicoativas, pacientes admitidos em estado crítico de inconsciência ou choque séptico sem acompanhante). Portanto, o próprio fato de a idade estar ausente carrega significado prognóstico (*missingness as a signal*), enquadrando o fenômeno sob os regimes MAR ou MNAR.
 
 2. **Inadequação da Imputação Univariada Simples (Média/Mediana)**:

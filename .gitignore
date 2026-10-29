@@ -3,3 +3,4 @@ TEST_INFRA.md
 TEST_READY.md
 __pycache__/
 scratch/
+build_docx_report.py
