@@ -190,7 +190,7 @@
 - **Elementos Visuais na Tela**:
   * Infográfico dos 4 Pilares de Exclusão de Colunas:
     1. *Constantes (>99%)*: 5 colunas excluídas (`TP_NOT`, `ID_AGRAVO`, `FORMA`, `ID_PAIS`, `IDADEminutos`).
-    2. *Faltantes (>60%)*: 52 colunas excluídas (esquemas de rifampicina, isoniazida e pirazinamida com ~64% nulos; teste molecular com 62%; cultura com 65%).
+    2. *Faltantes (>60%)*: 52 colunas excluídas (esquemas de rifampicina, isoniazida e pirazinamida com 66,83% nulos; teste molecular com 62%; cultura com 65%).
     3. *Redundantes*: 14 colunas excluídas (idades brutas, datas completas, municípios).
     4. *Vazamento Temporal*: 13 colunas excluídas (`DT_ENCERRA`, baciloscopias mensais do 1º ao 6º mês, transferências).
   * Balanço Numérico Final: **108 colunas originais** $\rightarrow$ **84 descartadas** $\rightarrow$ **24 originais mantidas + 2 derivadas** = **26 preditores candidatos** (+ 1 alvo).
@@ -202,7 +202,7 @@
 - **Texto Integral de Fala (Script Transcrito)**:
   > *"Para reduzir o espaço amostral sem incorrer em sobreajuste nem utilizar métricas contra o alvo nesta fase, aplicamos quatro regras fixas de negócio.*  
   > *Primeiro: eliminamos variáveis com mais de 99% de homogeneidade, como tipo de notificação e forma clínica, já que 100% da base era de casos pulmonares.*  
-  > *Segundo: descartamos atributos com mais de 60% de incompletude, incluindo esquemas de medicamentos específicos que possuíam mais de 64% de dados ausentes.*  
+  > *Segundo: descartamos atributos com mais de 60% de incompletude, incluindo esquemas de medicamentos específicos que possuíam 66,83% de dados ausentes.*  
   > *Terceiro: removemos colunas redundantes substituídas pelas variáveis derivadas.*  
   > *E quarto: eliminamos qualquer coluna com vazamento temporal, como baciloscopias de evolução mensal realizadas após o início do tratamento.*  
   > *O balanço final da Atividade 3 foi de exatamente 84 colunas descartadas e 24 colunas originais mantidas. Somadas às nossas 2 derivadas de idade em anos e ano de diagnóstico, consolidamos 26 variáveis preditoras candidatas e uma variável de desfecho, atingindo com perfeição a meta de 20 a 30 preditores. Todo esse processo foi catalogado linha a linha na tabela de decisão em CSV que entregamos ao projeto.*  

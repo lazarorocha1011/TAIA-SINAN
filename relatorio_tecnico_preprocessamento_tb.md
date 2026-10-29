@@ -16,6 +16,21 @@ O presente trabalho documenta e fundamenta a execução do pipeline final de pr�
 
 O objetivo primordial deste pipeline é entregar uma base de modelagem de alta fidelidade ecológica, livre de qualquer contaminação por vazamento de dados (*data leakage*), com granularidade clínica interpretável e plenamente amparada nos marcos normativos e legais brasileiros e internacionais.
 
+### 1.1 Síntese Quantitativa do Funil Amostral da Coorte (2014–2024)
+
+Para assegurar total transparência, auditabilidade e reprodutibilidade, o dimensionamento populacional da coorte em cada marco metodológico do projeto é sumarizado na tabela a seguir:
+
+| Marco Metodológico | Registros Totais (N) | Curas (N / %) | Óbitos por TB (N / %) | Proporção da Base (%) |
+| :--- | :---: | :---: | :---: | :---: |
+| **1. Base Bruta Original (SINAN Pulmonar)** | 884.221 | — | — | 100,00% |
+| **2. Exclusão de Outros Desfechos (Ativ. 3)** | 280.808 | — | — | 31,76% (Descartados) |
+| **3. Coorte Analítica Inicial (Cura x Óbito)** | 603.413 | 568.780 (94,26%) | 34.633 (5,74%) | 68,24% (Retidos) |
+| **4. Expurgo de Casos Pós-Óbito (Leakage / Ativ. 4)** | 4.095 | 6 (0,15%) | 4.089 (99,85%) | 0,68% (Descartados) |
+| **5. Coorte Final Limpa para Modelagem** | 599.318 | 568.774 (94,90%) | 30.544 (5,10%) | 99,32% da Coorte |
+| **6. Partição de Treino (80,0% Estratificado)** | 479.454 | 455.019 (94,90%) | 24.435 (5,10%) | 80,00% da Coorte Limpa |
+| **7. Partição de Teste (20,0% Rigorosamente Isolado)** | 119.864 | 113.755 (94,90%) | 6.109 (5,10%) | 20,00% da Coorte Limpa |
+| **8. Treino Balanceado por RUS 1:1** | 48.870 | 24.435 (50,00%) | 24.435 (50,00%) | Amostra Balanceada |
+
 ---
 
 ## 2. Fundamentação Legal e Demográfica da Discretização da Idade
