@@ -107,32 +107,32 @@ A tabela a seguir apresenta os 26 preditores candidatos ordenados pela magnitude
 
 | Posto | Atributo Preditor | Tipo | Métrica | Valor da Métrica | $p$-valor | Decisão (Corte Top 22) |
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: |
-| 1 | `TPUNINOT` | Categórica | V de Cramér | **0,2125** | $< 10^{-300}$ | **Mantido** |
-| 2 | `FAIXA_ETARIA` | Categórica | V de Cramér | **0,1417** | $< 10^{-300}$ | **Mantido** |
-| 3 | `AGRAVALCOO` | Categórica | V de Cramér | **0,1056** | $< 10^{-300}$ | **Mantido** |
-| 4 | `CS_ESCOL_N` | Categórica | V de Cramér | **0,1012** | $< 10^{-300}$ | **Mantido** |
-| 5 | `HIV` | Categórica | V de Cramér | **0,0953** | $< 10^{-300}$ | **Mantido** |
-| 6 | `POP_RUA` | Categórica | V de Cramér | **0,0847** | $< 10^{-300}$ | **Mantido** |
-| 7 | `TRATAMENTO` | Categórica | V de Cramér | **0,0756** | $< 10^{-300}$ | **Mantido** |
-| 8 | `AGRAVOUTRA` | Categórica | V de Cramér | **0,0743** | $< 10^{-300}$ | **Mantido** |
-| 9 | `POP_LIBER` | Categórica | V de Cramér | **0,0710** | $< 10^{-300}$ | **Mantido** |
-| 10 | `AGRAVTABAC` | Categórica | V de Cramér | **0,0644** | $< 10^{-300}$ | **Mantido** |
-| 11 | `AGRAVDOENC` | Categórica | V de Cramér | **0,0608** | $< 10^{-300}$ | **Mantido** |
-| 12 | `AGRAVDIABE` | Categórica | V de Cramér | **0,0602** | $< 10^{-300}$ | **Mantido** |
-| 13 | `NU_COMU_EX` | Numérica | Ponto-Bisserial (\|r\|) | **0,0549** | $6,86 \times 10^{-298}$ | **Mantido** |
-| 14 | `AGRAVDROGA` | Categórica | V de Cramér | **0,0502** | $1,72 \times 10^{-263}$ | **Mantido** |
-| 15 | `SG_UF` | Categórica | V de Cramér | **0,0483** | $7,80 \times 10^{-219}$ | **Mantido** |
-| 16 | `CRITERIO_LABORATORIAL` | Categórica | V de Cramér | **0,0456** | $4,98 \times 10^{-219}$ | **Mantido** |
-| 17 | `RAIOX_TORA` | Categórica | V de Cramér | **0,0414** | $6,76 \times 10^{-178}$ | **Mantido** |
-| 18 | `ANO_DIAG` | Categórica | V de Cramér | **0,0400** | $1,84 \times 10^{-158}$ | **Mantido** |
-| 19 | `AGRAVAIDS` | Categórica | V de Cramér | **0,0340** | $4,21 \times 10^{-121}$ | **Mantido** |
-| 20 | `REGIAO` | Categórica | V de Cramér | **0,0339** | $4,88 \times 10^{-117}$ | **Mantido** |
-| 21 | `CS_SEXO` | Categórica | V de Cramér | **0,0325** | $9,41 \times 10^{-111}$ | **Mantido** |
-| 22 | `BENEF_GOV` | Categórica | V de Cramér | **0,0325** | $6,19 \times 10^{-107}$ | **Mantido** |
-| 23 | `BACILOSC_E` | Categórica | V de Cramér | 0,0308 | $1,92 \times 10^{-99}$ | *Descartado* |
-| 24 | `POP_SAUDE` | Categórica | V de Cramér | 0,0263 | $1,77 \times 10^{-72}$ | *Descartado* |
-| 25 | `POP_IMIG` | Categórica | V de Cramér | 0,0201 | $7,72 \times 10^{-43}$ | *Descartado* |
-| 26 | `CS_RACA` | Categórica | V de Cramér | 0,0189 | $4,40 \times 10^{-35}$ | *Descartado* |
+| 1 | `FAIXA_ETARIA` | Categórica | V de Cramér | **0,1339** | $< 10^{-300}$ | **Mantido** |
+| 2 | `TRATAMENTO` | Categórica | V de Cramér | **0,0887** | $< 10^{-300}$ | **Mantido** |
+| 3 | `AGRAVAIDS` | Categórica | V de Cramér | **0,0841** | $< 10^{-300}$ | **Mantido** |
+| 4 | `HIV` | Categórica | V de Cramér | **0,0768** | $< 10^{-300}$ | **Mantido** |
+| 5 | `CS_ESCOL_N` | Categórica | V de Cramér | **0,0759** | $< 10^{-300}$ | **Mantido** |
+| 6 | `ANO_DIAG` | Categórica | V de Cramér | **0,0640** | $< 10^{-300}$ | **Mantido** |
+| 7 | `RAIOX_TORA` | Categórica | V de Cramér | **0,0608** | $< 10^{-300}$ | **Mantido** |
+| 8 | `AGRAVDIABE` | Categórica | V de Cramér | **0,0561** | $< 10^{-300}$ | **Mantido** |
+| 9 | `AGRAVALCOO` | Categórica | V de Cramér | **0,0519** | $< 10^{-300}$ | **Mantido** |
+| 10 | `AGRAVDROGA` | Categórica | V de Cramér | **0,0469** | $< 10^{-300}$ | **Mantido** |
+| 11 | `AGRAVTABAC` | Categórica | V de Cramér | **0,0462** | $< 10^{-300}$ | **Mantido** |
+| 12 | `AGRAVDOENC` | Categórica | V de Cramér | **0,0456** | $< 10^{-300}$ | **Mantido** |
+| 13 | `SG_UF` | Categórica | V de Cramér | **0,0437** | $< 10^{-300}$ | **Mantido** |
+| 14 | `CS_SEXO` | Categórica | V de Cramér | **0,0429** | $< 10^{-300}$ | **Mantido** |
+| 15 | `BENEF_GOV` | Categórica | V de Cramér | **0,0422** | $< 10^{-300}$ | **Mantido** |
+| 16 | `POP_RUA` | Categórica | V de Cramér | **0,0417** | $< 10^{-300}$ | **Mantido** |
+| 17 | `REGIAO` | Categórica | V de Cramér | **0,0388** | $< 10^{-300}$ | **Mantido** |
+| 18 | `AGRAVOUTRA` | Categórica | V de Cramér | **0,0382** | $< 10^{-300}$ | **Mantido** |
+| 19 | `POP_LIBER` | Categórica | V de Cramér | **0,0375** | $< 10^{-300}$ | **Mantido** |
+| 20 | `NU_COMU_EX` | Numérica | Ponto-Bisserial (|r|) | **0,0367** | $< 10^{-300}$ | **Mantido** |
+| 21 | `TPUNINOT` | Categórica | V de Cramér | **0,0335** | $< 10^{-300}$ | **Mantido** |
+| 22 | `CRITERIO_LABORATORIAL` | Categórica | V de Cramér | **0,0326** | $< 10^{-300}$ | **Mantido** |
+| 23 | `BACILOSC_E` | Categórica | V de Cramér | 0,0264 | $< 10^{-300}$ | *Descartado* |
+| 24 | `POP_SAUDE` | Categórica | V de Cramér | 0,0098 | $< 10^{-300}$ | *Descartado* |
+| 25 | `POP_IMIG` | Categórica | V de Cramér | 0,0090 | $< 10^{-300}$ | *Descartado* |
+| 26 | `CS_RACA` | Categórica | V de Cramér | 0,0077 | $< 10^{-300}$ | *Descartado* |
 
 ### 4.3 Justificativa do Ponto de Corte (Top 22 Preditores)
 Para atender à meta de manter entre 20 e 30 preditores, fixou-se o corte no **Top 22 atributos** ($V \ge 0,0325$). As quatro variáveis descartadas apresentavam limitações conceituais evidentes:
@@ -168,7 +168,7 @@ Adotou-se o **Random Undersampling (RUS) na proporção 1:1** aplicado unicament
 
 ## 6. Análise Gráfica do Desfecho Pré-Balanceamento
 
-O atributo **`FAIXA_ETARIA`** foi eleito para a representação visual da letalidade por representar a variável clínica mais expressiva do estudo ($V = 0,1417$, $\chi^2 = 9.622,31$, segundo lugar geral no ranking e primeiro lugar entre os fatores fisiopatológicos).
+O atributo **`FAIXA_ETARIA`** foi eleito para a representação visual da letalidade por representar a variável clínica mais expressiva do estudo ($V = 0,1339$, $\chi^2 = 8.594,40$, primeiro lugar geral no ranking dos 26 preditores candidatos).
 
 O cálculo foi realizado estritamente sobre o conjunto de **treino pré-balanceamento ($N = 479.454$)**, garantindo que as taxas de mortalidade reflitam a realidade epidemiológica não manipulada:
 

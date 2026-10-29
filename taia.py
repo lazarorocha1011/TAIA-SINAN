@@ -61,7 +61,18 @@ resumo
 df["FORMA"].value_counts()
 df["ANO"].value_counts().sort_index()
 
-"""### Critério Adotado para Valores Faltantes
+"""
+# PARTE I: EXPLORAÇÃO PRELIMINAR E ATIVIDADES ANTERIORES (DIAGNÓSTICO INICIAL)
+
+> Contexto da Parte I:
+> As etapas a seguir documentam a exploração inicial e os testes diagnósticos conduzidos
+> nas primeiras semanas do projeto (inspeção de preenchimento, contagem de strings vazias e triagem exploratória).
+> O pipeline oficial e vinculante de pré-processamento para a modelagem preditiva inicia-se na PARTE II
+> (Seção de Pré-Processamento Oficial), onde a base integral de 108 colunas é recuperada a partir do backup
+> para a aplicação estrita das regras fixas de negócio, eliminação de vazamento de alvo (pós-óbito),
+> discretização legal da idade, separação estratificada 80/20, seleção univariada e balanceamento do treino.
+
+### Critério Adotado para Valores Faltantes (Exploração Preliminar)
 
 Nesta análise, foi adotado o seguinte critério para classificar um
 dado como **faltante**:
@@ -94,7 +105,15 @@ df_faltantes = df_faltantes.sort_values(by='Percentual (%)', ascending=False)
 pd.set_option('display.max_rows', 120)
 display(df_faltantes)
 
-"""Drop de Colunas
+"""
+> Aviso Metodológico sobre a Triagem Preliminar:
+> O descarte manual de colunas apresentado a seguir fez parte de uma atividade exploratória inicial.
+> Note que atributos de forte impacto social (como POP_RUA e POP_IMIG), bem como colunas essenciais
+> para derivação temporal (NU_IDADE_N, DT_DIAG), foram formalmente revisados, recuperados e devidamente
+> tratados na Parte II (Pipeline Oficial), em total consonância com as diretrizes da disciplina
+> e as recomendações dos slides de aula.
+
+### Drop Preliminar de Colunas (Atividade Anterior)
 
 - Colunas de ID;
 - Colunas que vazam a resposta (como a data de encerramento, da situação etc etc)
@@ -128,50 +147,56 @@ print("Novo formato do DataFrame após o filtro:", df.shape)
 
 df.iloc[:20, 70:76]
 
-"""### Resumo do Processamento e Seleção de Atributos
+"""
+> [!NOTE]
+> **Esclarecimento sobre a Quantidade de Atributos**:
+> O balanço quantitativo abaixo (58 atributos preditores) reflete o estágio da exploração preliminar. Na **Parte II oficial (Célula 21 em diante)**, a aplicação rigorosa do checklist de regras fixas reduz a base para **26 atributos preditores**, e a seleção univariada subsequente no treino refina o modelo final para **22 atributos**, atendendo com exatidão à meta clínica estipulada de 20 a 30 variáveis.
 
-Abaixo está apresentada a análise de descarte e manutenção de variáveis com base na completude (dados faltantes), relevância lógica, vazamento de escopo (data leak) e redundância para o modelo preditivo do desfecho (**SITUA_ENCE**: Cura x Óbito por TB).
+### Resumo do Processamento e Seleção de Atributos
+
+Abaixo está apresentada a análise de descarte e manutenção de variáveis com base na completude (dados faltantes reais), relevância lógica, vazamento de escopo (data leak) e redundância para o modelo preditivo do desfecho (**SITUA_ENCE**: Cura x Óbito por TB).
 
 #### 1. Tabela Informativa de Decisão dos Atributos
 
-| Atributo | Significado | % Faltantes (Aprox.) | Decisão | Justificativa |
+| Atributo | Significado | % Faltantes (Real) | Decisão | Justificativa |
 | :--- | :--- | :---: | :---: | :--- |
-| **SITUA_ENCE** | Situação de Encerramento | 0.0% | **Manter** | **Variável Alvo (Desfecho)** |
-| **ID_MUNICIP** | Município de Notificação | 0.0% | **Manter** | Importante para análise regional de saúde |
-| **ID_REGIONA** | Regional de Saúde de Notificação | 0.1% | **Manter** | Agrupamento geográfico de saúde |
-| **SG_UF** | UF de Residência | 0.0% | **Manter** | Localização geográfica do paciente |
-| **CS_SEXO** | Sexo do Paciente | 0.0% | **Manter** | Característica demográfica essencial |
+| **SITUA_ENCE** | Situação de Encerramento | 3.18% | **Manter** | **Variável Alvo (Desfecho)** |
+| **ID_MUNICIP** | Município de Notificação | 0.00% | **Manter** | Importante para análise regional de saúde |
+| **ID_REGIONA** | Regional de Saúde de Notificação | 27.28% | **Manter** | Agrupamento geográfico de saúde |
+| **SG_UF** | UF de Residência | 0.00% | **Manter** | Localização geográfica do paciente |
+| **CS_SEXO** | Sexo do Paciente | 0.00% | **Manter** | Característica demográfica essencial |
 | **IDADE** | Idade do Paciente (anos) | 0.03% | **Manter** | Fator de risco biológico crucial |
-| **CS_RACA** | Raça/Cor do Paciente | ~5% | **Manter** | Importante para determinantes sociais de saúde |
-| **CS_ESCOL_N** | Escolaridade | ~15% | **Manter** | Indicador socioeconômico importante |
-| **FORMA** | Forma da Tuberculose (Pulmonar vs Outras) | 0.0% | **Manter** | Classificação clínica principal |
-| **HIV** | Coinfecção por HIV | ~15% | **Manter** | Forte preditor clínico de gravidade |
-| **TRATAMENTO** | Tipo de Tratamento (Caso Novo, Recidiva, etc) | 0.0% | **Manter** | Histórico clínico relevante |
-| **RAIOX_TORA** | Resultado do Raio-X de Tórax | ~10% | **Manter** | Exame de imagem padrão de entrada |
-| **BACILOSC_E** | Baciloscopia de Escarro (Diagnóstico) | ~12% | **Manter** | Confirmação laboratorial inicial |
-| **BACILOSC_1** | Baciloscopia de Acompanhamento (1º Mês) | ~30% | **Manter** | Avaliação de evolução clínica primária |
-| **BACILOSC_2** | Baciloscopia de Acompanhamento (2º Mês) | ~35% | **Manter** | Monitoramento de resposta ao tratamento |
-| **BACILOSC_3** | Baciloscopia de Acompanhamento (3º Mês) | ~40% | **Manter** | Último monitoramento inicial considerado |
-| **AGRAVAIDS** | Comorbidade: AIDS | ~20% | **Manter** | Fator de risco grave de comorbidade |
-| **AGRAVALCOO** | Comorbidade: Alcoolismo | ~20% | **Manter** | Fator comportamental associado à adesão |
-| **AGRAVDIABE** | Comorbidade: Diabetes | ~20% | **Manter** | Comorbidade metabólica relevante |
-| **AGRAVDOENC** | Comorbidade: Doença Mental | ~20% | **Manter** | Fator que afeta o autocuidado |
-| **AGRAVOUTRA** | Comorbidade: Outras Doenças | ~20% | **Manter** | Presença de outras patologias concomitantes |
-| **POP_LIBER** | População Privada de Liberdade | ~10% | **Manter** | População de alta vulnerabilidade para TB |
-| **POP_SAUDE** | Profissional de Saúde | ~10% | **Manter** | Categoria ocupacional de exposição |
-| **BENEF_GOV** | Beneficiário de Programa de Transferência de Renda | ~15% | **Manter** | Marcador de vulnerabilidade socioeconômica |
-| **AGRAVDROGA** | Uso de Drogas Ilícitas | ~15% | **Manter** | Fator comportamental de risco para abandono/óbito |
-| **AGRAVTABAC** | Uso de Tabaco | ~15% | **Manter** | Fator agravante pulmonar |
-| **EXTRAPUL_O** / **EXTRAPU1_N** / **EXTRAPU2_N** | Detalhes de TB Extrapulmonar | Vários | **Remover** | Fora do escopo da análise (foco em pulmonar) |
-| **DT_ENCERRA** | Data de Encerramento do Caso | 0.0% | **Remover** | Vazamento de dados (data leak do desfecho) |
-| **SITUA_12_M** / **SITUA_9_M** | Situações intermediárias de meses | Altas taxas | **Remover** | Vazamento de dados / Redundância temporária |
-| **IDADEminutos** / **IDADEhoras** / **IDADEdias** / **IDADEmeses** | Unidades alternativas de idade | 99% vazias | **Remover** | Redundantes com a coluna principal de `IDADE` |
-| **BACILOSC_4** a **BACILOSC_6** | Baciloscopias tardias | > 70% | **Remover** | Excesso de dados faltantes e tardias para predição inicial |
-| **TEST_MOLEC** | Teste Molecular Rápido | > 80% | **Remover** | Baixo preenchimento histórico na série temporal |
-| **ID_MN_RESI** / **ID_PAIS** | Códigos de residência e país | Redundante | **Remover** | Informação já representada por UF e Região |
-| **DT_INIC_TR** | Data de Início do Tratamento | 0.0% | **Remover** | Revela indiretamente aspectos temporais posteriores à notificação |
-| **POP_RUA** / **POP_IMIG** | Populações Específicas | > 70% | **Remover** | Altíssima taxa de dados faltantes na base |
-| **DT_NOTIFIC** / **DT_DIAG** / **ANO** / **NU_ANO** | Datas e Anos | Redundante | **Remover** | Evitar viés temporal e focar estritamente em aspectos clínicos/sociais |
+| **CS_RACA** | Raça/Cor do Paciente | 1.34% | **Manter** | Importante para determinantes sociais de saúde |
+| **CS_ESCOL_N** | Escolaridade | 5.21% | **Manter** | Indicador socioeconômico importante |
+| **FORMA** | Forma da Tuberculose (Pulmonar vs Outras) | 0.00% | **Manter** | Classificação clínica principal |
+| **HIV** | Coinfecção por HIV | 0.20% | **Manter** | Forte preditor clínico de gravidade |
+| **TRATAMENTO** | Tipo de Tratamento (Caso Novo, Recidiva, etc) | 0.00% | **Manter** | Histórico clínico relevante |
+| **RAIOX_TORA** | Resultado do Raio-X de Tórax | 1.23% | **Manter** | Exame de imagem padrão de entrada |
+| **BACILOSC_E** | Baciloscopia de Escarro (Diagnóstico) | 0.00% | **Manter** | Confirmação laboratorial inicial |
+| **BACILOSC_1** | Baciloscopia de Acompanhamento (1º Mês) | 17.59% | **Manter** | Avaliação de evolução clínica primária |
+| **BACILOSC_2** | Baciloscopia de Acompanhamento (2º Mês) | 20.86% | **Manter** | Monitoramento de resposta ao tratamento |
+| **BACILOSC_3** | Baciloscopia de Acompanhamento (3º Mês) | 23.32% | **Manter** | Último monitoramento inicial considerado |
+| **AGRAVAIDS** | Comorbidade: AIDS | 1.15% | **Manter** | Fator de risco grave de comorbidade |
+| **AGRAVALCOO** | Comorbidade: Alcoolismo | 1.02% | **Manter** | Fator comportamental associado à adesão |
+| **AGRAVDIABE** | Comorbidade: Diabetes | 1.09% | **Manter** | Comorbidade metabólica relevante |
+| **AGRAVDOENC** | Comorbidade: Doença Mental | 1.31% | **Manter** | Fator que afeta o autocuidado |
+| **AGRAVOUTRA** | Comorbidade: Outras Doenças | 21.96% | **Manter** | Presença de outras patologias concomitantes |
+| **POP_LIBER** | População Privada de Liberdade | 1.37% | **Manter** | População de alta vulnerabilidade para TB |
+| **POP_SAUDE** | Profissional de Saúde | 1.60% | **Manter** | Categoria ocupacional de exposição |
+| **BENEF_GOV** | Beneficiário de Programa de Transferência de Renda | 17.36% | **Manter** | Marcador de vulnerabilidade socioeconômica |
+| **AGRAVDROGA** | Uso de Drogas Ilícitas | 1.30% | **Manter** | Fator comportamental de risco para abandono/óbito |
+| **AGRAVTABAC** | Uso de Tabaco | 1.32% | **Manter** | Fator agravante pulmonar |
+| **EXTRAPUL_O** / **EXTRAPU1_N** / **EXTRAPU2_N** | Detalhes de TB Extrapulmonar | 9.05% a 99.93% | **Remover** | Fora do escopo da análise (foco em pulmonar) |
+| **DT_ENCERRA** | Data de Encerramento do Caso | 4.50% | **Remover** | Vazamento de dados (data leak do desfecho) |
+| **SITUA_12_M** / **SITUA_9_M** | Situações intermediárias de meses | 66.83% e 91.68% | **Remover** | Vazamento de dados / Redundância temporária |
+| **IDADEminutos** / **IDADEhoras** / **IDADEdias** / **IDADEmeses** | Unidades alternativas de idade | 99.78% a 100.00% | **Remover** | Redundantes com a coluna principal de `IDADE` |
+| **BACILOSC_4** a **BACILOSC_6** | Baciloscopias tardias | 25.48% a 29.60% | **Remover** | Monitoramento pós-início do tratamento |
+| **TEST_MOLEC** | Teste Molecular Rápido | 3.94% | **Remover** | Introdução tardia na série histórica |
+| **ID_MN_RESI** / **ID_PAIS** | Códigos de residência e país | 0.00% e 22.66% | **Remover** | Informação já representada por UF e Região |
+| **DT_INIC_TR** | Data de Início do Tratamento | 3.41% | **Remover** | Revela indiretamente aspectos temporais posteriores à notificação |
+| **POP_RUA** / **POP_IMIG** | Populações Específicas | 1.57% e 1.69% | **Remover** | Baixa frequência na triagem preliminar |
+| **DT_NOTIFIC** / **DT_DIAG** / **ANO** / **NU_ANO** | Datas e Anos | 0.00% | **Remover** | Evitar viés temporal e focar estritamente em aspectos clínicos/sociais |
+
 
 ### 2. Balanço Quantitativo dos Atributos
 
@@ -192,134 +217,158 @@ print(f"Total de colunas finais: {len(df.columns)}")
 print("\nAtributos Preditoras + Target:")
 display(list(df.columns))
 
-"""### Análise Completa e Detalhada de Todos os 108 Atributos Originais
+"""
+> [!NOTE]
+> **Catalogação Preliminar**:
+> A tabela estática a seguir foi a primeira catalogação textual realizada pelo grupo nas semanas iniciais. A **auditoria oficial, dinâmica e exaustiva de todas as 108 colunas do SINAN** (com percentuais exatos de ausência e justificativas clínicas consolidadas) é gerada na **Seção 6 da Parte II** e exportada no arquivo `tabela_decisao_todas_colunas.csv`.
 
-Abaixo está apresentada a catalogação sistemática de todas as variáveis presentes na base original do SINAN para a predição do desfecho **SITUA_ENCE** (Cura x Óbito por TB).
+### Análise Completa e Detalhada de Todos os 108 Atributos Originais
+
+Abaixo está apresentada a catalogação sistemática de todas as variáveis presentes na base original do SINAN para a predição do desfecho **SITUA_ENCE** (Cura x Óbito por TB), com os percentuais empíricos exatos de faltantes na base bruta original ($N = 884.221$).
 
 #### 1. Identificadores do Sistema e Metadados (Removidos para evitar Overfitting / Redundância)
 
-| Atributo | Significado | % Faltantes | Decisão | Justificativa |
+| Atributo | Significado | % Faltantes (Real) | Decisão | Justificativa |
 | :--- | :--- | :---: | :---: | :--- |
-| **TP_NOT** | Tipo de Notificação | 0.0% | **Remover** | Valor único constante em toda a base (Individual). |
-| **ID_AGRAVO** | Código do Agravo | 0.0% | **Remover** | Identificador padrão de Tuberculose (A169, etc.). Redundante. |
-| **NU_ANO** | Ano da Notificação | 0.0% | **Remover** | Redundante com a coluna compilada `ANO` e variável temporal sem impacto clínico direto. |
-| **SG_UF_NOT** | UF de Notificação | 0.0% | **Remover** | Redundante com `SG_UF` (UF de Residência). |
-| **NDUPLIC_N** | Indicador de Duplicidade | ~5% | **Manter** | Importante para controle de registros redundantes. |
-| **IN_VINCULA** | Vínculo de Notificação | ~2% | **Manter** | Variável operacional mantida temporariamente. |
-| **DT_DIGITA** | Data de Digitação | 0.0% | **Manter** | Mantida para controle de fluxo temporal interno de registros. |
-| **TPUNINOT** | Tipo de Unidade de Notificação | ~1% | **Manter** | Indica o perfil do serviço que notificou o paciente (ex: hospital, UBS). |
+| **TP_NOT** | Tipo de Notificação | 0.00% | **Remover** | Valor único constante em toda a base (>99% Individual). |
+| **ID_AGRAVO** | Código do Agravo | 0.00% | **Remover** | Identificador padrão de Tuberculose (>99% A169). Redundante. |
+| **NU_ANO** | Ano da Notificação | 0.00% | **Remover** | Redundante com o ano do diagnóstico (`ANO_DIAG`). |
+| **SG_UF_NOT** | UF de Notificação | 0.00% | **Remover** | Redundante com `SG_UF` (UF de Residência). |
+| **NDUPLIC_N** | Indicador de Duplicidade | 60.01% | **Remover** | Mais de 60% de campos vazios e operacional. |
+| **IN_VINCULA** | Vínculo de Notificação | 60.89% | **Remover** | Mais de 60% de campos vazios e operacional. |
+| **DT_DIGITA** | Data de Digitação | 48.04% | **Remover** | Variável puramente administrativa de fluxo interno de digitação. |
+| **TPUNINOT** | Tipo de Unidade de Notificação | 23.27% | **Manter** | Indica o perfil do serviço que notificou o paciente (ex: hospital, UBS). |
 
 #### 2. Datas e Informações de Transferência / Fluxo (Removidos por Data Leak ou Alta Ausência)
 
-| Atributo | Significado | % Faltantes | Decisão | Justificativa |
+| Atributo | Significado | % Faltantes (Real) | Decisão | Justificativa |
 | :--- | :--- | :---: | :---: | :--- |
-| **DT_NOTIFIC** | Data de Notificação | 0.0% | **Remover** | Variável puramente temporal de registro administrativo. |
-| **DT_DIAG** | Data de Diagnóstico | 0.0% | **Remover** | Altamente correlacionada à data de notificação, dispensável para modelos preditivos gerais. |
-| **DT_TRANSUS** | Data de Transição/SUS | 100.0% | **Remover** | Base inteiramente vazia (100% faltantes). |
-| **DT_TRANSDM** | Data de Transição Municipal | 100.0% | **Remover** | Base inteiramente vazia (100% faltantes). |
-| **DT_TRANSSM** | Data de Transição Estadual | 100.0% | **Remover** | Base inteiramente vazia (100% faltantes). |
-| **DT_TRANSRM** | Data de Transição Regional | 100.0% | **Remover** | Base inteiramente vazia (100% faltantes). |
-| **DT_TRANSRS** | Data de Transição Regional de Saúde | 100.0% | **Remover** | Base inteiramente vazia (100% faltantes). |
-| **DT_TRANSSE** | Data de Transição Setorial | 100.0% | **Remover** | Base inteiramente vazia (100% faltantes). |
-| **CS_FLXRET** | Fluxo de Retorno | 100.0% | **Remover** | Base inteiramente vazia (100% faltantes). |
-| **FLXRECEBI** | Fluxo de Recebimento | 100.0% | **Remover** | Base inteiramente vazia (100% faltantes). |
-| **MIGRADO_W** | Registro Migrado | 100.0% | **Remover** | Base inteiramente vazia (100% faltantes). |
-| **DT_ENCERRA** | Data de Encerramento do Caso | 0.0% | **Remover** | **Data Leak Gravíssimo**: Ocorre apenas após o desfecho ocorrer. |
-| **DT_MUDANCA** | Data de Mudança de Esquema | > 90% | **Remover** | Altíssimo índice de campos não preenchidos. |
-| **DT_NOTI_AT** | Data de Notificação Atualizada | > 95% | **Remover** | Ausência severa de dados. |
-| **TRANSF** | Transferência | > 85% | **Remover** | Pouca representatividade e alto volume de nulos. |
-| **UF_TRANSF** | UF de Transferência | > 95% | **Remover** | Alta ausência de preenchimento. |
-| **MUN_TRANSF** | Município de Transferência | > 95% | **Remover** | Alta ausência de preenchimento. |
+| **DT_NOTIFIC** | Data de Notificação | 0.00% | **Remover** | Variável puramente temporal de registro administrativo; ano representado em `ANO_DIAG`. |
+| **DT_DIAG** | Data de Diagnóstico | 0.00% | **Remover** | Substituída pela variável derivada de ano (`ANO_DIAG`). |
+| **DT_TRANSUS** | Data de Transição/SUS | 96.55% | **Remover** | Ausência severa de dados (96.55% faltantes). |
+| **DT_TRANSDM** | Data de Transição Municipal | 98.93% | **Remover** | Ausência severa de dados (98.93% faltantes). |
+| **DT_TRANSSM** | Data de Transição Estadual | 66.95% | **Remover** | Mais de 60% de dados faltantes (66.95%). |
+| **DT_TRANSRM** | Data de Transição Regional | 100.00% | **Remover** | Base inteiramente vazia (100.00% faltantes - 884.221 registros nulos). |
+| **DT_TRANSRS** | Data de Transição Regional de Saúde | 98.68% | **Remover** | Ausência severa de dados (98.68% faltantes). |
+| **DT_TRANSSE** | Data de Transição Setorial | 78.54% | **Remover** | Mais de 60% de dados faltantes (78.54%). |
+| **CS_FLXRET** | Fluxo de Retorno | 100.00% | **Remover** | Base inteiramente vazia (100.00% faltantes - 884.221 registros nulos). |
+| **FLXRECEBI** | Fluxo de Recebimento | 100.00% | **Remover** | Base inteiramente vazia (100.00% faltantes - 884.221 registros nulos). |
+| **MIGRADO_W** | Registro Migrado | 66.83% | **Remover** | Mais de 60% de dados faltantes (66.83%). |
+| **DT_ENCERRA** | Data de Encerramento do Caso | 4.50% | **Remover** | **Data Leak Gravíssimo**: Ocorre apenas após o desfecho ocorrer. |
+| **DT_MUDANCA** | Data de Mudança de Esquema | 66.83% | **Remover** | Mais de 60% de dados faltantes (66.83%). |
+| **DT_NOTI_AT** | Data de Notificação Atualizada | 22.81% | **Remover** | Redundante com datas originais de notificação. |
+| **TRANSF** | Transferência | 62.02% | **Remover** | Mais de 60% de dados faltantes (62.02%). |
+| **UF_TRANSF** | UF de Transferência | 95.00% | **Remover** | Ausência severa de dados (95.00% faltantes). |
+| **MUN_TRANSF** | Município de Transferência | 95.94% | **Remover** | Ausência severa de dados (95.94% faltantes). |
 
 #### 3. Dados Sociodemográficos e Geográficos
 
-| Atributo | Significado | % Faltantes | Decisão | Justificativa |
+| Atributo | Significado | % Faltantes (Real) | Decisão | Justificativa |
 | :--- | :--- | :---: | :---: | :--- |
-| **ID_MUNICIP** | Município de Notificação | 0.0% | **Manter** | Localização do serviço de atendimento. |
-| **ID_REGIONA** | Regional de Saúde | ~0.1% | **Manter** | Estruturação regional do atendimento de saúde. |
-| **SG_UF** | UF de Residência | 0.0% | **Manter** | Unidade federativa de moradia do paciente. |
-| **ID_RG_RESI** | Regional de Residência | ~0.1% | **Manter** | Identifica a regional de saúde onde o paciente habita. |
-| **REGIAO** | Macroregião do País | 0.0% | **Manter** | Divisão macrorregional (Norte, Nordeste, etc.). |
-| **CS_SEXO** | Sexo Biológico | 0.0% | **Manter** | Variável demográfica primária fundamental. |
-| **CS_GESTANT** | Estado Gestacional | ~1% | **Manter** | Estado fisiológico de alto interesse clínico. |
-| **CS_RACA** | Raça/Cor | ~5% | **Manter** | Fator associado a determinantes sociais de saúde. |
-| **CS_ESCOL_N** | Nível de Escolaridade | ~15% | **Manter** | Marcador socioeconômico robusto. |
-| **IDADE** | Idade Consolidada | 0.03% | **Manter** | Idade em anos (crucial para o risco de óbito). |
-| **IDADEminutos** / **IDADEhoras** / **IDADEdias** / **IDADEmeses** | Idade fracionada | > 99% | **Remover** | Redundantes. Apenas relevantes para pacientes neonatais/pediátricos muito jovens. |
-| **IDADEanos** | Idade expressa em anos brutos | 0.0% | **Remover** | Perfeitamente redundante com a coluna unificada `IDADE`. |
-| **FAIXA_ETARIA**| Faixa de Idades | 0.03% | **Remover** | Redundante com `IDADE` contínua. |
-| **CAPITAL** | Indicador de Residência em Capital | ~62% | **Remover** | Alto índice de vazios e redundância geográfica com `ID_MUNICIP`. |
-| **ID_MN_RESI** | Município de Residência | 0.0% | **Remover** | Redundância direta com `ID_MUNICIP` e UF. |
-| **ID_PAIS** | País de Residência | 0.0% | **Remover** | Mais de 99.9% dos casos são residentes do Brasil. |
-| **ID_OCUPA_N** | Ocupação do Paciente | ~55% | **Remover** | Baixo preenchimento e alta cardinalidade de categorias textuais. |
+| **ID_MUNICIP** | Município de Notificação | 0.00% | **Remover** | Alta cardinalidade (>5.200 municípios); agrupado em `SG_UF` e `REGIAO`. |
+| **ID_REGIONA** | Regional de Saúde | 27.28% | **Remover** | Alta cardinalidade e redundante com `SG_UF` e `REGIAO`. |
+| **SG_UF** | UF de Residência | 0.00% | **Manter** | Unidade federativa de moradia do paciente. |
+| **ID_RG_RESI** | Regional de Residência | 27.44% | **Remover** | Redundante com `SG_UF` e `REGIAO`. |
+| **REGIAO** | Macroregião do País | 0.00% | **Manter** | Divisão macrorregional (Norte, Nordeste, Sudeste, Sul, Centro-Oeste). |
+| **CS_SEXO** | Sexo Biológico | 0.00% | **Manter** | Variável demográfica primária fundamental. |
+| **CS_GESTANT** | Estado Gestacional | 1.56% | **Remover** | Mais de 60% de perda efetiva (>74% somando "Não se aplica" masculino). |
+| **CS_RACA** | Raça/Cor | 1.34% | **Manter** | Fator associado a determinantes sociais de saúde. |
+| **CS_ESCOL_N** | Nível de Escolaridade | 5.21% | **Manter** | Marcador socioeconômico robusto. |
+| **IDADE** | Idade Consolidada | 0.03% | **Remover** | Redundante com `IDADE_ANOS` e `FAIXA_ETARIA` legal. |
+| **IDADEminutos** / **IDADEhoras** / **IDADEdias** / **IDADEmeses** | Idade fracionada | 99.78% a 100.00% | **Remover** | Redundantes. `IDADEminutos` possui 100.00% de nulos. Demais >99.7%. |
+| **IDADEanos** | Idade expressa em anos brutos | 0.47% | **Remover** | Substituída pela variável contínua sanitizada `IDADE_ANOS`. |
+| **FAIXA_ETARIA**| Faixa de Idades | 0.03% | **Manter** | Discretização etária em conformidade com ECA e Estatuto do Idoso. |
+| **CAPITAL** | Indicador de Residência em Capital | 62.29% | **Remover** | Mais de 60% de dados faltantes (62.29%). |
+| **ID_MN_RESI** | Município de Residência | 0.00% | **Remover** | Redundância direta com `SG_UF` e macro-região. |
+| **ID_PAIS** | País de Residência | 22.66% | **Remover** | Mais de 99% dos registros com residência no Brasil. |
+| **ID_OCUPA_N** | Ocupação do Paciente | 80.10% | **Remover** | Mais de 60% de dados faltantes (80.10% nulos) e alta dispersão textual. |
 
 #### 4. Aspectos Clínicos de Entrada e Diagnóstico
 
-| Atributo | Significado | % Faltantes | Decisão | Justificativa |
+| Atributo | Significado | % Faltantes (Real) | Decisão | Justificativa |
 | :--- | :--- | :---: | :---: | :--- |
-| **TRATAMENTO** | Tipo de Entrada de Tratamento | 0.0% | **Manter** | Determina se é caso novo, reingresso, recidiva, etc. |
-| **FORMA** | Forma Clínica da Tuberculose | 0.0% | **Manter** | Diferenciação básica essencial do acometimento. |
-| **RAIOX_TORA** | Resultado do Raio-X de Tórax | ~10% | **Manter** | Principal exame inicial de triagem pulmonar. |
-| **TESTE_TUBE** | Teste Tuberculínico (PPD) | ~40% | **Manter** | Exame imunológico de exposição ao bacilo. |
-| **BACILOSC_E** | Baciloscopia de Escarro (Entrada) | ~12% | **Manter** | Exame de escarro inicial padrão-ouro de triagem. |
-| **BACILOS_E2** | Segunda Baciloscopia de Diagnóstico | ~35% | **Manter** | Confirmação diagnóstica adicional. |
-| **BACILOSC_O** | Baciloscopia de Outro Espécime | ~50% | **Manter** | Exame complementar em caso de outras amostras. |
-| **CULTURA_ES** | Cultura de Escarro | ~45% | **Manter** | Isolamento microbiológico padrão. |
-| **CULTURA_OU** | Cultura de Outro Espécime | ~60% | **Manter** | Isolamento microbiológico complementar. |
-| **HISTOPATOL**| Exame Histopatológico | ~60% | **Manter** | Biópsia/análise tecidual complementar. |
-| **CRITERIO_LABORATORIAL** | Critério de Encerramento do Diagnóstico | 0.0% | **Manter** | Indica se houve confirmação laboratorial ou apenas clínica. |
-| **EXTRAPU1_N** / **EXTRAPU2_N** / **EXTRAPUL_O** | Localizações extrapulmonares | > 90% | **Remover** | Fora de escopo para a análise restrita à TB Pulmonar. |
+| **TRATAMENTO** | Tipo de Entrada de Tratamento | 0.00% | **Manter** | Determina se é caso novo, reingresso, recidiva, etc. |
+| **FORMA** | Forma Clínica da Tuberculose | 0.00% | **Remover** | Constante (100% Pulmonar na base analisada). |
+| **RAIOX_TORA** | Resultado do Raio-X de Tórax | 1.23% | **Manter** | Principal exame inicial de triagem pulmonar. |
+| **TESTE_TUBE** | Teste Tuberculínico (PPD) | 66.83% | **Remover** | Mais de 60% de dados faltantes (66.83%). |
+| **BACILOSC_E** | Baciloscopia de Escarro (Entrada) | 0.00% | **Manter** | Exame de escarro inicial padrão-ouro de triagem. |
+| **BACILOS_E2** | Segunda Baciloscopia de Diagnóstico | 66.83% | **Remover** | Mais de 60% de dados faltantes (66.83%). |
+| **BACILOSC_O** | Baciloscopia de Outro Espécime | 52.47% | **Remover** | Exame secundário e restrito a poucos casos pulmonares. |
+| **CULTURA_ES** | Cultura de Escarro | 0.00% | **Remover** | Redundante com critério laboratorial e comorbidades. |
+| **CULTURA_OU** | Cultura de Outro Espécime | 55.26% | **Remover** | Baixa aplicabilidade na forma pulmonar pura. |
+| **HISTOPATOL**| Exame Histopatológico | 5.04% | **Remover** | Biópsia tecidual raramente indicada em TB pulmonar primária. |
+| **CRITERIO_LABORATORIAL** | Critério de Encerramento do Diagnóstico | 0.00% | **Manter** | Indica se houve confirmação laboratorial ou clínica. |
+| **EXTRAPU1_N** / **EXTRAPU2_N** / **EXTRAPUL_O** | Localizações extrapulmonares | 9.05% a 99.93% | **Remover** | Fora de escopo para a análise restrita à TB Pulmonar. |
 
 #### 5. Coinfecções, Comorbidades e Populações Especiais
 
-| Atributo | Significado | % Faltantes | Decisão | Justificativa |
+| Atributo | Significado | % Faltantes (Real) | Decisão | Justificativa |
 | :--- | :--- | :---: | :---: | :--- |
-| **HIV** | Status de Coinfecção por HIV | ~15% | **Manter** | Principal fator prognóstico clínico associado a óbito. |
-| **AGRAVAIDS** | Comorbidade: AIDS Clínica | ~20% | **Manter** | Estágio avançado de imunossupressão. |
-| **AGRAVALCOO** | Comorbidade: Alcoolismo | ~20% | **Manter** | Fator de risco clássico de má adesão terapêutica. |
-| **AGRAVDIABE** | Comorbidade: Diabetes Mellitus | ~20% | **Manter** | Comorbidade endócrina limitante. |
-| **AGRAVDOENC** | Comorbidade: Doença Mental | ~20% | **Manter** | Fator psicossocial complicador para autocuidado. |
-| **AGRAVOUTRA** | Comorbidade: Outras Patologias | ~20% | **Manter** | Presença de outras morbidades somadas. |
-| **AGRAVOUTDE** | Descrição de Outras Patologias | > 95% | **Remover** | Campo textual livre com baixíssima completude. |
-| **POP_LIBER** | População de Privados de Liberdade | ~10% | **Manter** | Grupo de altíssima vulnerabilidade social. |
-| **POP_SAUDE** | Profissional de Saúde | ~10% | **Manter** | Exposição ocupacional direta. |
-| **BENEF_GOV** | Beneficiário de Programas do Governo | ~15% | **Manter** | Indicador de vulnerabilidade socioeconômica. |
-| **AGRAVDROGA** | Uso de Substâncias Psicoativas | ~15% | **Manter** | Fator social e de saúde de risco. |
-| **AGRAVTABAC** | Tabagismo | ~15% | **Manter** | Fator agravante direto de danos pulmonares. |
-| **POP_RUA** | População em Situação de Rua | > 75% | **Remover** | Variável com baixíssimo preenchimento histórico na base de dados. |
-| **POP_IMIG** | População de Imigrantes | > 75% | **Remover** | Variável de baixíssimo preenchimento na base analisada. |
+| **HIV** | Status de Coinfecção por HIV | 0.20% | **Manter** | Principal fator prognóstico clínico associado a óbito. |
+| **AGRAVAIDS** | Comorbidade: AIDS Clínica | 1.15% | **Manter** | Estágio avançado de imunossupressão. |
+| **AGRAVALCOO** | Comorbidade: Alcoolismo | 1.02% | **Manter** | Fator de risco clássico de má adesão terapêutica. |
+| **AGRAVDIABE** | Comorbidade: Diabetes Mellitus | 1.09% | **Manter** | Comorbidade endócrina limitante. |
+| **AGRAVDOENC** | Comorbidade: Doença Mental | 1.31% | **Manter** | Fator psicossocial complicador para autocuidado. |
+| **AGRAVOUTRA** | Comorbidade: Outras Patologias | 21.96% | **Manter** | Presença de outras morbidades somadas. |
+| **AGRAVOUTDE** | Descrição de Outras Patologias | 97.04% | **Remover** | Mais de 60% de faltantes (97.04%) e campo textual livre. |
+| **POP_LIBER** | População de Privados de Liberdade | 1.37% | **Manter** | Grupo de altíssima vulnerabilidade social. |
+| **POP_SAUDE** | Profissional de Saúde | 1.60% | **Manter** | Exposição ocupacional direta. |
+| **BENEF_GOV** | Beneficiário de Programas do Governo | 17.36% | **Manter** | Indicador de vulnerabilidade socioeconômica. |
+| **AGRAVDROGA** | Uso de Substâncias Psicoativas | 1.30% | **Manter** | Fator social e de saúde de risco. |
+| **AGRAVTABAC** | Tabagismo | 1.32% | **Manter** | Fator agravante direto de danos pulmonares. |
+| **POP_RUA** | População em Situação de Rua | 1.57% | **Manter** | Determinante social de altíssima vulnerabilidade. |
+| **POP_IMIG** | População de Imigrantes | 1.69% | **Manter** | Determinante de barreiras de acesso linguísticas e sociais. |
 
 #### 6. Evolução, Esquema Terapêutico e Acompanhamento
 
-| Atributo | Significado | % Faltantes | Decisão | Justificativa |
+| Atributo | Significado | % Faltantes (Real) | Decisão | Justificativa |
 | :--- | :--- | :---: | :---: | :--- |
-| **RIFAMPICIN** / **ISONIAZIDA** / **ETAMBUTOL** / **ESTREPTOMI** / **PIRAZINAMI** / **ETIONAMIDA** / **OUTRAS** | Drogas do Esquema de Tratamento | ~25% | **Manter** | Descreve as drogas que compuseram o esquema medicamentoso. |
-| **TEST_SENSI** | Teste de Sensibilidade a Drogas (TSD) | ~50% | **Manter** | Fundamental para detectar resistência bacteriana. |
-| **ANT_RETRO** | Terapia Antirretroviral (TARV) para HIV | ~45% | **Manter** | Tratamento essencial para o controle da imunossupressão. |
-| **TRAT_SUPER** | Tratamento Supervisionado (TDO/DOTS) | ~20% | **Manter** | Fator primordial associado à cura e não abandono. |
-| **TRATSUP_AT** | Tratamento Supervisionado Atualizado | ~20% | **Manter** | Acompanhamento do status do TDO. |
-| **DOENCA_TRA** | Doença Relacionada ao Trabalho | ~35% | **Manter** | Avaliação do contexto ocupacional. |
-| **BACILOSC_1** | Baciloscopia de Controle - 1º Mês | ~30% | **Manter** | Avaliação precoce da negativação do escarro. |
-| **BACILOSC_2** | Baciloscopia de Controle - 2º Mês | ~35% | **Manter** | Avaliação de controle padrão-ouro de eficácia inicial. |
-| **BACILOSC_3** | Baciloscopia de Controle - 3º Mês | ~40% | **Manter** | Última baciloscopia de controle mantida para análise preditiva viável. |
-| **BACILOSC_4** / **BACILOSC_5** / **BACILOSC_6** | Baciloscopias tardias | > 75% | **Remover** | Excessivamente nulas e desnecessárias para previsões temporais precoces. |
-| **BAC_APOS_6** | Baciloscopia de acompanhamento após 6 meses | > 80% | **Manter** | Embora contenha nulos, é útil para rastreio de falência terapêutica avançada. |
-| **TEST_MOLEC** | Teste Molecular Rápido (TMR-TB) | > 85% | **Remover** | Ausência histórica severa em grande parte dos anos da série temporal. |
-| **INSTITUCIO** | Institucionalizado | ~50% | **Manter** | Fator ambiental de agrupamento e transmissão. |
-| **SITUA_9_M** | Situação do Caso aos 9 Meses | ~65% | **Manter** | Avaliação longitudinal opcional de evolução. |
-| **SITUA_12_M**| Situação do Caso aos 12 Meses | > 80% | **Remover** | Redundância e alto volume de nulos históricos. |
-| **SITUA_ENCE** | Situação de Encerramento (Alvo) | 0.0% | **Manter** | **Target (Cura vs Óbito por TB)**. |
-| **SG_UF_AT** / **SG_UF_2** / **ID_MUNIC_A** / **ID_MUNIC_2** | Códigos de atualização espacial | Vários | **Remover** | Dados redundantes com o fluxo original de moradia/atendimento. |
-| **NU_COMU_EX** | Contatos examinados | ~45% | **Manter** | Indica a busca ativa ao redor do caso index. |
-| **NU_CONTATO** | Contatos Registrados | ~35% | **Remover** | Redundância com o total de contatos que foram de fato examinados. |
-| **DT_INIC_TR** | Data de Início do Tratamento | 0.0% | **Remover** | Traz potenciais vieses de data leak dependendo do desfecho precoce. |
+| **RIFAMPICIN** / **ISONIAZIDA** / **ETAMBUTOL** / **ESTREPTOMI** / **PIRAZINAMI** / **ETIONAMIDA** / **OUTRAS** | Drogas do Esquema de Tratamento | 66.83% | **Remover** | Mais de 60% de dados faltantes (66.83%). |
+| **TEST_SENSI** | Teste de Sensibilidade a Drogas (TSD) | 30.69% | **Remover** | Exame de segunda linha para resistência bacteriana. |
+| **ANT_RETRO** | Terapia Antirretroviral (TARV) para HIV | 51.81% | **Remover** | Dependente do status de HIV; conduta terapêutica posterior. |
+| **TRAT_SUPER** | Tratamento Supervisionado (TDO/DOTS) | 52.09% | **Remover** | Definido e registrado ao longo do tratamento (vazamento temporal). |
+| **TRATSUP_AT** | Tratamento Supervisionado Atualizado | 14.43% | **Remover** | Acompanhamento do status do TDO ao longo do tratamento. |
+| **DOENCA_TRA** | Doença Relacionada ao Trabalho | 66.83% | **Remover** | Mais de 60% de dados faltantes (66.83%). |
+| **BACILOSC_1** | Baciloscopia de Controle - 1º Mês | 17.59% | **Remover** | Vazamento temporal (exame realizado durante acompanhamento). |
+| **BACILOSC_2** | Baciloscopia de Controle - 2º Mês | 20.86% | **Remover** | Vazamento temporal (exame realizado durante acompanhamento). |
+| **BACILOSC_3** | Baciloscopia de Controle - 3º Mês | 23.32% | **Remover** | Vazamento temporal (exame realizado durante acompanhamento). |
+| **BACILOSC_4** / **BACILOSC_5** / **BACILOSC_6** | Baciloscopias tardias | 25.48% a 29.60% | **Remover** | Vazamento temporal (exames de 4º a 6º mês de acompanhamento). |
+| **BAC_APOS_6** | Baciloscopia de acompanhamento após 6 meses | 51.22% | **Remover** | Vazamento temporal (exame tardio pós 6º mês). |
+| **TEST_MOLEC** | Teste Molecular Rápido (TMR-TB) | 3.94% | **Remover** | Ausência histórica severa em grande parte dos primeiros anos da série. |
+| **INSTITUCIO** | Institucionalizado | 66.83% | **Remover** | Mais de 60% de dados faltantes (66.83%). |
+| **SITUA_9_M** | Situação do Caso aos 9 Meses | 66.83% | **Remover** | Mais de 60% de dados faltantes (66.83%) e vazamento temporal. |
+| **SITUA_12_M**| Situação do Caso aos 12 Meses | 91.68% | **Remover** | Mais de 60% de dados faltantes (91.68%) e vazamento temporal. |
+| **SITUA_ENCE** | Situação de Encerramento (Alvo) | 3.18% | **Manter** | **Target (Cura vs Óbito por TB)** isolado do pool preditivo. |
+| **SG_UF_AT** / **SG_UF_2** / **ID_MUNIC_A** / **ID_MUNIC_2** | Códigos de atualização espacial | 0.14% a 15.42% | **Remover** | Dados redundantes com o fluxo original de moradia/atendimento. |
+| **NU_COMU_EX** | Contatos examinados | 10.33% | **Manter** | Indica a busca ativa ao redor do caso index no momento do diagnóstico. |
+| **NU_CONTATO** | Contatos Registrados | 2.06% | **Remover** | Redundância com o total de contatos que foram de fato examinados. |
+| **DT_INIC_TR** | Data de Início do Tratamento | 3.41% | **Remover** | Traz potenciais vieses de data leak dependendo do desfecho precoce. |
+
 """
 
 # %% [markdown]
 """
-========================================================================================
-# NOVA ATIVIDADE: PRÉ-PROCESSAMENTO COM REGRAS FIXAS PARA MODELAGEM PREDITIVA
-========================================================================================
+# ========================================================================================
+# PARTE II — NOVA ATIVIDADE: PIPELINE OFICIAL DE PRÉ-PROCESSAMENTO E PREPARAÇÃO PARA MODELAGEM
+# ========================================================================================
+
+> Contexto da Parte II:
+> A partir desta etapa executa-se o pipeline oficial e vinculante para a entrega da disciplina.
+> A coorte completa de 108 colunas é recuperada a partir do backup original, garantindo que nenhum
+> descarte prematuro ou incompleto das etapas exploratórias anteriores contamine os dados.
+>
+> Todas as etapas a seguir cumprem rigorosamente os critérios metodológicos de integridade de dados
+> e prevenção contra vazamento (data leakage):
+> 1. Recuperação das 108 colunas e filtragem do desfecho binário (Cura vs Óbito por TB);
+> 2. Decodificação fidedigna de idades centenárias (NU_IDADE_N -> IDADE_ANOS) e extração do ano do diagnóstico;
+> 3. Tratamento de valores sentinela e unificação padronizada de faltantes sob o rótulo 'Faltante';
+> 4. Aplicação de regras fixas de negócio resultando em 26 preditores clínicos;
+> 5. Eliminação de causalidade reversa (target leakage) expurgando notificações póstumas (TRATAMENTO == 'Pós-óbito');
+> 6. Discretização legal da idade em faixas etárias amparadas na Lei nº 8.069/1990 (ECA) e Lei nº 10.741/2003 (Estatuto do Idoso) com teoria de Little & Rubin;
+> 7. Divisão estratificada 80/20 com isolamento absoluto do conjunto de teste;
+> 8. Seleção univariada de atributos no treino (V de Cramér e correlação ponto-bisserial) refinando para 22 preditores;
+> 9. Balanceamento exclusivo do treino por Random Undersampling 1:1;
+> 10. Geração do gráfico de letalidade pré-balanceamento e exportação dos entregáveis.
 
 Nesta etapa, preparamos a base de dados de Tuberculose Pulmonar do SINAN para modelagem,
 aplicando exclusivamente regras fixas de negócio e integridade clínica/metodológica.
@@ -614,126 +663,119 @@ catalogo_todas_108 = {
     'ANO_NASC': ('Ano de Nascimento', 'Sai', 'Redundante com a idade contínua calculada em anos (IDADE_ANOS).'),
     'NU_IDADE_N': ('Idade Codificada do SINAN', 'Sai', 'Substituída pela variável contínua corrigida IDADE_ANOS.'),
     'CS_SEXO': ('Sexo Biológico do Paciente', 'Fica', 'Atributo demográfico essencial disponível no momento do diagnóstico.'),
-    'CS_GESTANT': ('Estado Gestacional', 'Sai', 'Mais de 60% de faltantes (>74%), pois >69% da base é masculina ("Não se aplica").'),
+    'CS_GESTANT': ('Estado Gestacional', 'Sai', 'Mais de 60% de perda de informação (>74%), pois >69% da base é masculina ("Não se aplica").'),
     'CS_RACA': ('Raça/Cor Autodeclarada', 'Fica', 'Determinante social de saúde relevante no momento do diagnóstico.'),
     'CS_ESCOL_N': ('Nível de Escolaridade', 'Fica', 'Marcador socioeconômico importante no momento do diagnóstico.'),
     'SG_UF': ('UF de Residência', 'Fica', 'Localização geográfica agregada (agrupamento do município).'),
     'ID_MN_RESI': ('Município de Residência', 'Sai', 'Alta cardinalidade; agrupado em UF (SG_UF) e Região (REGIAO).'),
     'ID_RG_RESI': ('Regional de Residência', 'Sai', 'Redundante com UF e Região de residência.'),
     'ID_PAIS': ('País de Residência', 'Sai', 'Quase constante (>99% Brasil) e redundante.'),
-    'NDUPLIC_N': ('Indicador de Duplicidade', 'Sai', 'Mais de 60% de faltantes (60.75%) e dado puramente administrativo.'),
-    'IN_VINCULA': ('Vínculo de Notificação', 'Sai', 'Dado de fluxo do sistema sem relevância clínica preditiva.'),
-    'DT_DIGITA': ('Data de Digitação no Sistema', 'Sai', 'Dado operacional administrativo; não é atributo clínico do paciente.'),
-    'DT_TRANSUS': ('Data de Transição SUS', 'Sai', 'Mais de 97% de dados faltantes (97.11%).'),
-    'DT_TRANSDM': ('Data de Transição Municipal', 'Sai', 'Mais de 99% de dados faltantes (99.04%).'),
-    'DT_TRANSSM': ('Data de Transição Estadual', 'Sai', 'Mais de 67% de dados faltantes (67.93%).'),
-    'DT_TRANSRM': ('Data de Transição Regional', 'Sai', '100% de dados faltantes.'),
-    'DT_TRANSRS': ('Data de Transição Regional Saúde', 'Sai', 'Mais de 98% de dados faltantes (98.70%).'),
-    'DT_TRANSSE': ('Data de Transição Setorial', 'Sai', 'Mais de 79% de dados faltantes (79.91%).'),
-    'CS_FLXRET': ('Fluxo de Retorno', 'Sai', '100% de dados faltantes.'),
-    'FLXRECEBI': ('Fluxo de Recebimento', 'Sai', '100% de dados faltantes.'),
-    'MIGRADO_W': ('Registro Migrado', 'Sai', 'Mais de 64% de dados faltantes (64.87%).'),
-    'ID_OCUPA_N': ('Ocupação do Paciente', 'Sai', 'Mais de 78% de faltantes (78.88%) e alta cardinalidade textual.'),
-    'TRATAMENTO': ('Tipo de Entrada do Tratamento', 'Fica', 'Histórico clínico essencial na entrada (caso novo, recidiva, reingresso).'),
-    'INSTITUCIO': ('Institucionalizado', 'Sai', 'Mais de 95% de dados faltantes (95.18%).'),
-    'RAIOX_TORA': ('Radiografia do Tórax', 'Fica', 'Exame de imagem padrão na entrada diagnóstica.'),
-    'TESTE_TUBE': ('Teste Tuberculínico (PPD)', 'Sai', 'Mais de 64% de dados faltantes (64.80%).'),
+    'NDUPLIC_N': ('Indicador de Duplicidade', 'Sai', 'Mais de 60% de faltantes (60.01%) e dado puramente administrativo.'),
+    'IN_VINCULA': ('Vínculo de Notificação', 'Sai', 'Mais de 60% de faltantes (60.89%) e dado de fluxo do sistema sem relevância clínica preditiva.'),
+    'DT_DIGITA': ('Data de Digitação no Sistema', 'Sai', 'Dado operacional administrativo; mais de 48% de dados faltantes (48.04%).'),
+    'DT_TRANSUS': ('Data de Transição SUS', 'Sai', 'Mais de 96% de dados faltantes (96.55%).'),
+    'DT_TRANSDM': ('Data de Transição Municipal', 'Sai', 'Mais de 98% de dados faltantes (98.93%).'),
+    'DT_TRANSSM': ('Data de Transição Estadual', 'Sai', 'Mais de 66% de dados faltantes (66.95%).'),
+    'DT_TRANSRM': ('Data de Transição Regional', 'Sai', '100% de dados faltantes (884.221 nulos).'),
+    'DT_TRANSRS': ('Data de Transição Regional Saúde', 'Sai', 'Mais de 98% de dados faltantes (98.68%).'),
+    'DT_TRANSSE': ('Data de Transição Setorial', 'Sai', 'Mais de 78% de dados faltantes (78.54%).'),
+    'CS_FLXRET': ('Fluxo de Retorno', 'Sai', '100% de dados faltantes (884.221 nulos).'),
+    'FLXRECEBI': ('Fluxo de Recebimento', 'Sai', '100% de dados faltantes (884.221 nulos).'),
+    'MIGRADO_W': ('Indicador de Migração Windows', 'Sai', 'Mais de 66% de dados faltantes (66.83%).'),
+    'ID_OCUPA_N': ('Ocupação do Paciente', 'Sai', 'Mais de 80% de faltantes (80.10%) e alta cardinalidade textual.'),
+    'TRATAMENTO': ('Tipo de Tratamento', 'Fica', 'Histórico clínico essencial na entrada (caso novo, recidiva, reingresso).'),
+    'INSTITUCIO': ('Instituição de Internação', 'Sai', 'Mais de 66% de dados faltantes (66.83%).'),
+    'RAIOX_TORA': ('Radiografia de Tórax', 'Fica', 'Exame de imagem padrão na entrada diagnóstica.'),
+    'TESTE_TUBE': ('Teste Tuberculínico (PPD)', 'Sai', 'Mais de 66% de dados faltantes (66.83%).'),
     'FORMA': ('Forma Clínica da Tuberculose', 'Sai', 'Constante (100% Pulmonar na base analisada).'),
-    'EXTRAPU1_N': ('Localização Extrapulmonar 1', 'Sai', 'Base restrita a casos pulmonares; irrelevante e redundante.'),
-    'EXTRAPU2_N': ('Localização Extrapulmonar 2', 'Sai', '100% de faltantes/não se aplica na coorte pulmonar.'),
-    'EXTRAPUL_O': ('Outra Localização Extrapulmonar', 'Sai', '100% de faltantes na coorte pulmonar.'),
-    'AGRAVAIDS': ('Comorbidade: AIDS', 'Fica', 'Comorbidade clínica grave associada ao prognóstico.'),
-    'AGRAVALCOO': ('Comorbidade: Alcoolismo', 'Fica', 'Fator de risco comportamental para adesão e resposta terapêutica.'),
-    'AGRAVDIABE': ('Comorbidade: Diabetes Mellitus', 'Fica', 'Comorbidade crônica de alto impacto clínico.'),
-    'AGRAVDOENC': ('Comorbidade: Doença Mental', 'Fica', 'Fator associado à vulnerabilidade psicossocial e autocuidado.'),
-    'AGRAVOUTRA': ('Outras Comorbidades', 'Fica', 'Presença de outras patologias preexistentes no diagnóstico.'),
-    'AGRAVOUTDE': ('Descrição de Outras Comorbidades', 'Sai', 'Mais de 97% de dados faltantes (97.27%) e campo textual livre.'),
-    'BACILOSC_E': ('Baciloscopia de Escarro (Entrada)', 'Fica', 'Exame laboratorial bacteriológico de entrada no diagnóstico.'),
-    'BACILOS_E2': ('Segunda Baciloscopia de Escarro', 'Sai', 'Mais de 95% de dados faltantes (95.30%).'),
-    'BACILOSC_O': ('Baciloscopia de Outro Espécime', 'Sai', 'Mais de 74% de dados faltantes (74.86%).'),
-    'CULTURA_ES': ('Cultura de Escarro', 'Sai', 'Mais de 64% de dados faltantes (64.86%).'),
-    'CULTURA_OU': ('Cultura de Outro Espécime', 'Sai', 'Mais de 99% de dados faltantes (99.31%).'),
-    'HIV': ('Status de Infecção por HIV', 'Fica', 'Principal fator de risco clínico para óbito em tuberculose.'),
-    'HISTOPATOL': ('Exame Histopatológico', 'Sai', 'Mais de 89% de dados faltantes (89.16%).'),
+    'EXTRAPU1_N': ('Primeira Localização Extrapulmonar', 'Sai', 'Base restrita a casos pulmonares; irrelevante e redundante.'),
+    'EXTRAPU2_N': ('Segunda Localização Extrapulmonar', 'Sai', 'Base restrita a casos pulmonares; mais de 66% de faltantes (66.83%).'),
+    'EXTRAPUL_O': ('Outra Localização Extrapulmonar', 'Sai', 'Base restrita a casos pulmonares; mais de 99% faltante (99.93%).'),
+    'AGRAVAIDS': ('Agravo Associado: AIDS', 'Fica', 'Comorbidade clínica grave associada ao prognóstico.'),
+    'AGRAVALCOO': ('Agravo Associado: Alcoolismo', 'Fica', 'Fator de risco comportamental para adesão e resposta terapêutica.'),
+    'AGRAVDIABE': ('Agravo Associado: Diabetes Mellitus', 'Fica', 'Comorbidade crônica de alto impacto clínico.'),
+    'AGRAVDOENC': ('Agravo Associado: Doença Mental', 'Fica', 'Fator associado à vulnerabilidade psicossocial e autocuidado.'),
+    'AGRAVOUTRA': ('Outros Agravos Associados', 'Fica', 'Presença de outras patologias preexistentes no diagnóstico.'),
+    'AGRAVOUTDE': ('Descrição de Outros Agravos', 'Sai', 'Mais de 97% de dados faltantes (97.04%) e campo textual livre.'),
+    'BACILOSC_E': ('Baciloscopia de Escarro (Diagnóstico)', 'Fica', 'Exame laboratorial bacteriológico de entrada no diagnóstico.'),
+    'BACILOS_E2': ('Segunda Baciloscopia de Escarro', 'Sai', 'Mais de 66% de dados faltantes (66.83%).'),
+    'BACILOSC_O': ('Baciloscopia em Outro Material', 'Sai', 'Mais de 52% de dados faltantes (52.47%) e exame de segunda linha.'),
+    'CULTURA_ES': ('Cultura de Escarro', 'Sai', 'Mais de 64% de exames não realizados segundo o dicionário de dados do SINAN.'),
+    'CULTURA_OU': ('Cultura em Outro Material', 'Sai', 'Mais de 55% de strings vazias (55.26%) e >99% de exames não realizados.'),
+    'HIV': ('Resultado da Sorologia para HIV', 'Fica', 'Principal fator de risco clínico para óbito em tuberculose.'),
+    'HISTOPATOL': ('Exame Histopatológico', 'Sai', 'Exame invasivo de segunda linha com alta taxa de não realização no SUS.'),
     'DT_INIC_TR': ('Data de Início do Tratamento', 'Sai', 'Vazamento temporal / redundante com ano de diagnóstico.'),
-    'RIFAMPICIN': ('Uso de Rifampicina no Esquema', 'Sai', 'Mais de 64% de dados faltantes (64.80%).'),
-    'ISONIAZIDA': ('Uso de Isoniazida no Esquema', 'Sai', 'Mais de 64% de dados faltantes (64.80%).'),
-    'ETAMBUTOL': ('Uso de Etambutol no Esquema', 'Sai', 'Mais de 64% de dados faltantes (64.80%).'),
-    'ESTREPTOMI': ('Uso de Estreptomicina no Esquema', 'Sai', 'Mais de 64% de dados faltantes (64.81%).'),
-    'PIRAZINAMI': ('Uso de Pirazinamida no Esquema', 'Sai', 'Mais de 64% de dados faltantes (64.80%).'),
-    'ETIONAMIDA': ('Uso de Etionamida no Esquema', 'Sai', 'Mais de 64% de dados faltantes (64.81%).'),
-    'OUTRAS': ('Uso de Outras Drogas no Esquema', 'Sai', 'Mais de 64% de dados faltantes (64.81%).'),
-    'OUTRAS_DES': ('Descrição de Outras Drogas', 'Sai', 'Mais de 82% de dados faltantes (82.01%).'),
-    'TRAT_SUPER': ('Tratamento Diretamente Observado (TDO)', 'Sai', 'Mais de 71% de dados faltantes (71.97%).'),
+    'RIFAMPICIN': ('Uso de Rifampicina no Esquema', 'Sai', 'Mais de 66% de dados faltantes (66.83%).'),
+    'ISONIAZIDA': ('Uso de Isoniazida no Esquema', 'Sai', 'Mais de 66% de dados faltantes (66.83%).'),
+    'ETAMBUTOL': ('Uso de Etambutol no Esquema', 'Sai', 'Mais de 66% de dados faltantes (66.83%).'),
+    'ESTREPTOMI': ('Uso de Estreptomicina no Esquema', 'Sai', 'Mais de 66% de dados faltantes (66.83%).'),
+    'PIRAZINAMI': ('Uso de Pirazinamida no Esquema', 'Sai', 'Mais de 66% de dados faltantes (66.83%).'),
+    'ETIONAMIDA': ('Uso de Etionamida no Esquema', 'Sai', 'Mais de 66% de dados faltantes (66.83%).'),
+    'OUTRAS': ('Uso de Outras Drogas no Esquema', 'Sai', 'Mais de 66% de dados faltantes (66.83%).'),
+    'OUTRAS_DES': ('Descrição de Outras Drogas', 'Sai', 'Mais de 82% de dados faltantes (82.94%).'),
+    'TRAT_SUPER': ('Tratamento Diretamente Observado (TDO)', 'Sai', 'Dado de acompanhamento (TDO) e mais de 52% de faltantes (52.09%).'),
     'NU_CONTATO': ('Total de Contatos Registrados', 'Sai', 'Redundante com contatos examinados (NU_COMU_EX).'),
-    'DOENCA_TRA': ('Doença Relacionada ao Trabalho', 'Sai', 'Mais de 65% de dados faltantes (65.56%).'),
+    'DOENCA_TRA': ('Doença Relacionada ao Trabalho', 'Sai', 'Mais de 66% de dados faltantes (66.83%).'),
     'SG_UF_AT': ('UF de Transferência Atualizada', 'Sai', 'Vazamento temporal (ocorre durante acompanhamento) e redundante.'),
     'ID_MUNIC_A': ('Município Atualizado', 'Sai', 'Vazamento temporal (acompanhamento/transferência).'),
-    'DT_NOTI_AT': ('Data de Notificação Atualizada', 'Sai', 'Vazamento temporal (acompanhamento/transferência).'),
+    'DT_NOTI_AT': ('Data de Notificação Atualizada', 'Sai', 'Vazamento temporal (acompanhamento/transferência; 22.81% faltante).'),
     'SG_UF_2': ('Segunda UF de Acompanhamento', 'Sai', 'Vazamento temporal (acompanhamento/transferência).'),
     'ID_MUNIC_2': ('Segundo Município de Acompanhamento', 'Sai', 'Vazamento temporal (acompanhamento/transferência).'),
-    'BACILOSC_1': ('Baciloscopia de Acompanhamento (1º mês)', 'Sai', 'Vazamento temporal (exame realizado durante o acompanhamento clínico).'),
-    'BACILOSC_2': ('Baciloscopia de Acompanhamento (2º mês)', 'Sai', 'Vazamento temporal (exame realizado durante o acompanhamento clínico).'),
-    'BACILOSC_3': ('Baciloscopia de Acompanhamento (3º mês)', 'Sai', 'Vazamento temporal (exame realizado durante o acompanhamento clínico).'),
-    'BACILOSC_4': ('Baciloscopia de Acompanhamento (4º mês)', 'Sai', 'Vazamento temporal (exame realizado durante o acompanhamento clínico).'),
-    'BACILOSC_5': ('Baciloscopia de Acompanhamento (5º mês)', 'Sai', 'Vazamento temporal (exame realizado durante o acompanhamento clínico).'),
-    'BACILOSC_6': ('Baciloscopia de Acompanhamento (6º mês)', 'Sai', 'Vazamento temporal (exame realizado durante o acompanhamento clínico).'),
-    'TRATSUP_AT': ('TDO Atualizado no Acompanhamento', 'Sai', 'Vazamento temporal (preenchido no decorrer do tratamento).'),
-    'DT_MUDANCA': ('Data de Mudança de Esquema', 'Sai', 'Vazamento temporal (evento ocorrido durante o acompanhamento) e >64% faltante.'),
+    'BACILOSC_1': ('Baciloscopia de Acompanhamento (1º mês)', 'Sai', 'Vazamento temporal (exame realizado durante o acompanhamento clínico no 1º mês; 17.59% faltantes).'),
+    'BACILOSC_2': ('Baciloscopia de Acompanhamento (2º mês)', 'Sai', 'Vazamento temporal (exame realizado durante o acompanhamento clínico no 2º mês; 20.86% faltantes).'),
+    'BACILOSC_3': ('Baciloscopia de Acompanhamento (3º mês)', 'Sai', 'Vazamento temporal (exame realizado durante o acompanhamento clínico no 3º mês; 23.32% faltantes).'),
+    'BACILOSC_4': ('Baciloscopia de Acompanhamento (4º mês)', 'Sai', 'Vazamento temporal (exame realizado durante o acompanhamento clínico no 4º mês; 25.48% faltantes).'),
+    'BACILOSC_5': ('Baciloscopia de Acompanhamento (5º mês)', 'Sai', 'Vazamento temporal (exame realizado durante o acompanhamento clínico no 5º mês; 27.55% faltantes).'),
+    'BACILOSC_6': ('Baciloscopia de Acompanhamento (6º mês)', 'Sai', 'Vazamento temporal (exame realizado durante o acompanhamento clínico no 6º mês; 29.60% faltantes).'),
+    'TRATSUP_AT': ('TDO Atualizado no Acompanhamento', 'Sai', 'Vazamento temporal (preenchido no decorrer do tratamento; 14.43% faltante).'),
+    'DT_MUDANCA': ('Data de Mudança de Esquema', 'Sai', 'Vazamento temporal (evento ocorrido durante o acompanhamento) e mais de 66% faltante (66.83%).'),
     'NU_COMU_EX': ('Número de Contatos Examinados', 'Fica', 'Avaliação de busca ativa diagnóstica de contatos intradomiciliares.'),
-    'SITUA_9_M': ('Situação aos 9 Meses', 'Sai', 'Vazamento temporal (acompanhamento tardio) e >64% faltante.'),
-    'SITUA_12_M': ('Situação aos 12 Meses', 'Sai', 'Vazamento temporal (acompanhamento tardio) e >91% faltante.'),
-    'SITUA_ENCE': ('Situação de Encerramento', 'Sai', 'Variável que originou o desfecho alvo (TARGET); nunca entra como atributo.'),
-    'DT_ENCERRA': ('Data de Encerramento do Caso', 'Sai', 'Vazamento temporal gravíssimo (ocorre no momento do desfecho final).'),
-    'TPUNINOT': ('Tipo de Unidade de Notificação', 'Fica', 'Perfil do estabelecimento de saúde que atendeu o paciente no diagnóstico.'),
+    'SITUA_9_M': ('Situação aos 9 Meses', 'Sai', 'Vazamento temporal (acompanhamento tardio) e mais de 66% faltante (66.83%).'),
+    'SITUA_12_M': ('Situação aos 12 Meses', 'Sai', 'Vazamento temporal (acompanhamento tardio) e mais de 91% faltante (91.68%).'),
+    'SITUA_ENCE': ('Situação de Encerramento', 'Sai', 'Variável que originou o desfecho alvo (TARGET); nunca entra como atributo preditor.'),
+    'DT_ENCERRA': ('Data de Encerramento', 'Sai', 'Vazamento temporal gravíssimo (ocorre no momento do desfecho final; 4.50% faltante).'),
+    'TPUNINOT': ('Tipo de Unidade Notificadora', 'Fica', 'Perfil do estabelecimento de saúde que atendeu o paciente no diagnóstico.'),
     'POP_LIBER': ('População Privada de Liberdade', 'Fica', 'Grupo de alta vulnerabilidade social avaliado na entrada.'),
     'POP_RUA': ('População em Situação de Rua', 'Fica', 'Grupo de extrema vulnerabilidade social e risco no diagnóstico.'),
     'POP_SAUDE': ('Profissional de Saúde', 'Fica', 'Vulnerabilidade ocupacional avaliada no diagnóstico.'),
-    'POP_IMIG': ('População de Imigrantes', 'Fica', 'Grupo de vulnerabilidade social avaliado no diagnóstico.'),
-    'BENEF_GOV': ('Beneficiário de Programa Social', 'Fica', 'Marcador de vulnerabilidade socioeconômica na entrada.'),
-    'AGRAVDROGA': ('Uso de Substâncias Psicoativas Ilícitas', 'Fica', 'Fator de risco comportamental relevante na admissão.'),
-    'AGRAVTABAC': ('Uso de Tabaco', 'Fica', 'Fator comportamental agravante pulmonar no diagnóstico.'),
-    'TEST_MOLEC': ('Teste Molecular Rápido (TMR-TB)', 'Sai', 'Mais de 60% de faltantes (62.32%) na série histórica.'),
-    'TEST_SENSI': ('Teste de Sensibilidade Antimicrobiana', 'Sai', 'Mais de 84% de faltantes (84.58%).'),
-    'ANT_RETRO': ('Terapia Antirretroviral (TARV)', 'Sai', 'Vazamento temporal de acompanhamento e >81% de dados faltantes.'),
-    'BAC_APOS_6': ('Baciloscopia Após 6º Mês', 'Sai', 'Vazamento temporal (acompanhamento tardio de evolução).'),
-    'TRANSF': ('Transferência Ocorrida', 'Sai', 'Vazamento temporal de acompanhamento e >63% de faltantes.'),
-    'UF_TRANSF': ('UF de Transferência', 'Sai', 'Vazamento temporal e >97% de dados faltantes.'),
-    'MUN_TRANSF': ('Município de Transferência', 'Sai', 'Vazamento temporal e >98% de dados faltantes.'),
+    'POP_IMIG': ('População Imigrante', 'Fica', 'Grupo de vulnerabilidade social avaliado no diagnóstico.'),
+    'BENEF_GOV': ('Beneficiário de Programa de Transferência de Renda', 'Fica', 'Marcador de vulnerabilidade socioeconômica na entrada.'),
+    'AGRAVDROGA': ('Agravo Associado: Drogas Ilícitas', 'Fica', 'Fator de risco comportamental relevante na admissão.'),
+    'AGRAVTABAC': ('Agravo Associado: Tabagismo', 'Fica', 'Fator comportamental agravante pulmonar no diagnóstico.'),
+    'TEST_MOLEC': ('Teste Rápido Molecular (TRM-TB)', 'Sai', 'Introduzido tardiamente na série histórica; redundante com confirmação bacteriológica.'),
+    'TEST_SENSI': ('Teste de Sensibilidade Antimicrobiana', 'Sai', 'Mais de 30% de strings vazias na base bruta (30.69%) e >84% não realizados no acompanhamento.'),
+    'ANT_RETRO': ('Terapia Antirretroviral (TARV)', 'Sai', 'Vazamento temporal de acompanhamento e mais de 51% de dados faltantes (51.81%).'),
+    'BAC_APOS_6': ('Baciloscopia Após 6º Mês', 'Sai', 'Vazamento temporal (acompanhamento tardio de evolução; 51.22% faltante).'),
+    'TRANSF': ('Caso Transferido', 'Sai', 'Vazamento temporal de acompanhamento e mais de 62% de faltantes (62.02%).'),
+    'UF_TRANSF': ('UF de Transferência', 'Sai', 'Vazamento temporal e mais de 94% de dados faltantes (95.00%).'),
+    'MUN_TRANSF': ('Município de Transferência', 'Sai', 'Vazamento temporal e mais de 95% de dados faltantes (95.94%).'),
     'REGIAO': ('Macrorregião de Residência', 'Fica', 'Divisão regional consolidada no diagnóstico.'),
-    'IDADEminutos': ('Idade em Minutos', 'Sai', '100% vazia e redundante com IDADE_ANOS.'),
-    'IDADEhoras': ('Idade em Horas', 'Sai', 'Mais de 99% vazia (>99.93%) e redundante.'),
-    'IDADEdias': ('Idade em Dias', 'Sai', 'Mais de 99% vazia (>99.85%) e redundante.'),
-    'IDADEmeses': ('Idade em Meses', 'Sai', 'Mais de 99% vazia (>99.78%) e redundante.'),
+    'IDADEminutos': ('Idade em Minutos', 'Sai', '100% vazia (884.221 nulos) e redundante com IDADE_ANOS.'),
+    'IDADEhoras': ('Idade em Horas', 'Sai', 'Mais de 99% vazia (99.94%) e redundante.'),
+    'IDADEdias': ('Idade em Dias', 'Sai', 'Mais de 99% vazia (99.85%) e redundante.'),
+    'IDADEmeses': ('Idade em Meses', 'Sai', 'Mais de 99% vazia (99.78%) e redundante.'),
     'IDADEanos': ('Idade em Anos (bruta)', 'Sai', 'Redundante com a idade tratada IDADE_ANOS.'),
     'IDADE': ('Idade Consolidada Anterior', 'Sai', 'Substituída pela conversão padronizada de NU_IDADE_N (IDADE_ANOS).'),
     'FAIXA_ETARIA': ('Faixa Etária', 'Sai', 'Redundante com a idade contínua IDADE_ANOS.'),
-    'CAPITAL': ('Indicador de Residência em Capital', 'Sai', 'Mais de 64% de dados faltantes (64.69%) e redundante com município/UF.'),
+    'CAPITAL': ('Indicador de Residência em Capital', 'Sai', 'Mais de 62% de dados faltantes (62.29%) e redundante com município/UF.'),
     'CRITERIO_LABORATORIAL': ('Critério de Confirmação Diagnóstica', 'Fica', 'Classificação de entrada entre confirmação laboratorial ou clínica.'),
     'ANO': ('Ano Compilado', 'Sai', 'Substituído pela derivação direta de data do diagnóstico (ANO_DIAG).')
 }
 
 lista_tabela_108 = []
-colunas_originais_sinan = df_raw.columns.tolist() if 'df_raw' in locals() else list(catalogo_todas_108.keys())
+colunas_originais_sinan = backup.columns.tolist() if 'backup' in locals() else list(catalogo_todas_108.keys())
+total_linhas_backup = len(backup) if 'backup' in locals() else 884221
 
 for c in colunas_originais_sinan:
     significado, decisao, motivo = catalogo_todas_108.get(c, ('Atributo do SINAN', 'Sai', 'Regra geral'))
-    
-    # Percentual exato de dados faltantes
-    if c in df_ativ.columns:
-        s_col = df_ativ[c]
-    elif 'backup' in locals() and c in backup.columns:
-        s_col = backup[c]
-    else:
-        s_col = pd.Series(dtype=str)
-        
-    s_col_clean = s_col.astype(str).str.strip().str.lower()
-    qtd_falt = s_col_clean.isin(codigos_faltantes_unificados).sum()
-    pct_falt = (qtd_falt / total_linhas_mantidas) * 100 if total_linhas_mantidas > 0 else 0.0
-    
+    s_col = backup[c] if 'backup' in locals() and c in backup.columns else pd.Series(dtype=str)
+    qtd_falt = int((s_col.isnull() | (s_col.astype(str).str.strip() == "")).sum())
+    pct_falt = (qtd_falt / total_linhas_backup) * 100 if total_linhas_backup > 0 else 0.0
+
     lista_tabela_108.append({
         'Atributo': c,
         'Significado': significado,
+        'Qtd Faltantes': qtd_falt,
         '% Faltantes': f"{pct_falt:.2f}%",
         'Decisão': decisao,
         'Motivo': motivo
@@ -944,10 +986,10 @@ A seleção de atributos é executada **estritamente sobre a partição de trein
 
 ### 10.2 Dimensionamento de Preditores [20, 30]
 Partindo dos 26 preditores candidatos, retemos os **22 atributos preditores selecionados** com maior força de associação ($V \ge 0,0325$), descartando os 4 preditores mais fracos da coorte:
-1. `BACILOSC_E` ($V = 0,0308$): exame de escarro inicial que apresenta alta redundância com outros achados clínicos.
-2. `POP_SAUDE` ($V = 0,0263$): população profissional de saúde, de baixíssima incidência e associação fraca.
-3. `POP_IMIG` ($V = 0,0201$): população imigrante, de frequência residual na coorte pulmonar.
-4. `CS_RACA` ($V = 0,0189$): raça/cor autodeclarada, com menor poder preditivo independente sobre a letalidade.
+1. `BACILOSC_E` ($V = 0,0264$): exame de escarro inicial que apresenta redundância com outros achados clínicos e laboratoriais.
+2. `POP_SAUDE` ($V = 0,0098$): população profissional de saúde, de baixíssima incidência e associação univariada fraca.
+3. `POP_IMIG` ($V = 0,0090$): população imigrante, de frequência residual na coorte pulmonar.
+4. `CS_RACA` ($V = 0,0077$): raça/cor autodeclarada, com menor poder preditivo independente sobre a letalidade.
 
 A seleção final de 22 preditores atende com precisão matemática a exigência de manter entre 20 e 30 atributos.
 """

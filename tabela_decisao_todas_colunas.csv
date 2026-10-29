@@ -1,109 +1,109 @@
-﻿Atributo,Significado,% Faltantes,Decisão,Motivo
-TP_NOT,Tipo de Notificação,0.00%,Sai,Constante (>99% código 2 - Notificação Individual).
-ID_AGRAVO,Código do Agravo (CID-10),0.00%,Sai,Constante (>99% código A169 - Tuberculose pulmonar).
-DT_NOTIFIC,Data de Notificação,0.00%,Sai,Redundante/Administrativa; informação temporal representada por ANO_DIAG.
-NU_ANO,Ano da Notificação,0.00%,Sai,Redundante com o ano de diagnóstico (ANO_DIAG).
-SG_UF_NOT,UF da Unidade Notificadora,0.00%,Sai,Redundante com a UF de residência do paciente (SG_UF).
-ID_MUNICIP,Município de Notificação,0.00%,Sai,Alta cardinalidade (>5.200 municípios); agrupado em SG_UF e REGIAO.
-ID_REGIONA,Regional de Saúde Notificadora,28.08%,Sai,Alta cardinalidade e redundante com SG_UF e REGIAO.
-DT_DIAG,Data de Diagnóstico,0.00%,Sai,Substituída pela variável derivada ANO_DIAG (ano do diagnóstico).
-ANO_NASC,Ano de Nascimento,0.63%,Sai,Redundante com a idade contínua calculada em anos (IDADE_ANOS).
-NU_IDADE_N,Idade Codificada do SINAN,0.03%,Sai,Substituída pela variável contínua corrigida IDADE_ANOS.
-CS_SEXO,Sexo Biológico do Paciente,0.00%,Fica,Atributo demográfico essencial disponível no momento do diagnóstico.
-CS_GESTANT,Estado Gestacional,74.67%,Sai,"Mais de 60% de faltantes (>74%), pois >69% da base é masculina (""Não se aplica"")."
-CS_RACA,Raça/Cor Autodeclarada,0.00%,Fica,Determinante social de saúde relevante no momento do diagnóstico.
-CS_ESCOL_N,Nível de Escolaridade,0.00%,Fica,Marcador socioeconômico importante no momento do diagnóstico.
-SG_UF,UF de Residência,0.00%,Fica,Localização geográfica agregada (agrupamento do município).
-ID_MN_RESI,Município de Residência,0.00%,Sai,Alta cardinalidade; agrupado em UF (SG_UF) e Região (REGIAO).
-ID_RG_RESI,Regional de Residência,28.20%,Sai,Redundante com UF e Região de residência.
-ID_PAIS,País de Residência,25.26%,Sai,Quase constante (>99% Brasil) e redundante.
-NDUPLIC_N,Indicador de Duplicidade,60.75%,Sai,Mais de 60% de faltantes (60.75%) e dado puramente administrativo.
-IN_VINCULA,Vínculo de Notificação,59.62%,Sai,Dado de fluxo do sistema sem relevância clínica preditiva.
-DT_DIGITA,Data de Digitação no Sistema,51.28%,Sai,Dado operacional administrativo; não é atributo clínico do paciente.
-DT_TRANSUS,Data de Transição SUS,97.11%,Sai,Mais de 97% de dados faltantes (97.11%).
-DT_TRANSDM,Data de Transição Municipal,99.04%,Sai,Mais de 99% de dados faltantes (99.04%).
-DT_TRANSSM,Data de Transição Estadual,67.93%,Sai,Mais de 67% de dados faltantes (67.93%).
-DT_TRANSRM,Data de Transição Regional,100.00%,Sai,100% de dados faltantes.
-DT_TRANSRS,Data de Transição Regional Saúde,98.70%,Sai,Mais de 98% de dados faltantes (98.70%).
-DT_TRANSSE,Data de Transição Setorial,79.91%,Sai,Mais de 79% de dados faltantes (79.91%).
-CS_FLXRET,Fluxo de Retorno,100.00%,Sai,100% de dados faltantes.
-FLXRECEBI,Fluxo de Recebimento,100.00%,Sai,100% de dados faltantes.
-MIGRADO_W,Registro Migrado,64.87%,Sai,Mais de 64% de dados faltantes (64.87%).
-ID_OCUPA_N,Ocupação do Paciente,78.88%,Sai,Mais de 78% de faltantes (78.88%) e alta cardinalidade textual.
-TRATAMENTO,Tipo de Entrada do Tratamento,0.00%,Fica,"Histórico clínico essencial na entrada (caso novo, recidiva, reingresso)."
-INSTITUCIO,Institucionalizado,95.18%,Sai,Mais de 95% de dados faltantes (95.18%).
-RAIOX_TORA,Radiografia do Tórax,0.00%,Fica,Exame de imagem padrão na entrada diagnóstica.
-TESTE_TUBE,Teste Tuberculínico (PPD),64.80%,Sai,Mais de 64% de dados faltantes (64.80%).
-FORMA,Forma Clínica da Tuberculose,0.00%,Sai,Constante (100% Pulmonar na base analisada).
-EXTRAPU1_N,Localização Extrapulmonar 1,44.66%,Sai,Base restrita a casos pulmonares; irrelevante e redundante.
-EXTRAPU2_N,Localização Extrapulmonar 2,100.00%,Sai,100% de faltantes/não se aplica na coorte pulmonar.
-EXTRAPUL_O,Outra Localização Extrapulmonar,100.00%,Sai,100% de faltantes na coorte pulmonar.
-AGRAVAIDS,Comorbidade: AIDS,0.00%,Fica,Comorbidade clínica grave associada ao prognóstico.
-AGRAVALCOO,Comorbidade: Alcoolismo,0.00%,Fica,Fator de risco comportamental para adesão e resposta terapêutica.
-AGRAVDIABE,Comorbidade: Diabetes Mellitus,0.00%,Fica,Comorbidade crônica de alto impacto clínico.
-AGRAVDOENC,Comorbidade: Doença Mental,0.00%,Fica,Fator associado à vulnerabilidade psicossocial e autocuidado.
-AGRAVOUTRA,Outras Comorbidades,0.00%,Fica,Presença de outras patologias preexistentes no diagnóstico.
-AGRAVOUTDE,Descrição de Outras Comorbidades,97.27%,Sai,Mais de 97% de dados faltantes (97.27%) e campo textual livre.
-BACILOSC_E,Baciloscopia de Escarro (Entrada),0.00%,Fica,Exame laboratorial bacteriológico de entrada no diagnóstico.
-BACILOS_E2,Segunda Baciloscopia de Escarro,96.71%,Sai,Mais de 95% de dados faltantes (95.30%).
-BACILOSC_O,Baciloscopia de Outro Espécime,98.92%,Sai,Mais de 74% de dados faltantes (74.86%).
-CULTURA_ES,Cultura de Escarro,64.86%,Sai,Mais de 64% de dados faltantes (64.86%).
-CULTURA_OU,Cultura de Outro Espécime,99.31%,Sai,Mais de 99% de dados faltantes (99.31%).
-HIV,Status de Infecção por HIV,0.00%,Fica,Principal fator de risco clínico para óbito em tuberculose.
-HISTOPATOL,Exame Histopatológico,89.16%,Sai,Mais de 89% de dados faltantes (89.16%).
-DT_INIC_TR,Data de Início do Tratamento,2.47%,Sai,Vazamento temporal / redundante com ano de diagnóstico.
-RIFAMPICIN,Uso de Rifampicina no Esquema,64.80%,Sai,Mais de 64% de dados faltantes (64.80%).
-ISONIAZIDA,Uso de Isoniazida no Esquema,64.80%,Sai,Mais de 64% de dados faltantes (64.80%).
-ETAMBUTOL,Uso de Etambutol no Esquema,64.80%,Sai,Mais de 64% de dados faltantes (64.80%).
-ESTREPTOMI,Uso de Estreptomicina no Esquema,64.81%,Sai,Mais de 64% de dados faltantes (64.81%).
-PIRAZINAMI,Uso de Pirazinamida no Esquema,64.80%,Sai,Mais de 64% de dados faltantes (64.80%).
-ETIONAMIDA,Uso de Etionamida no Esquema,64.81%,Sai,Mais de 64% de dados faltantes (64.81%).
-OUTRAS,Uso de Outras Drogas no Esquema,64.81%,Sai,Mais de 64% de dados faltantes (64.81%).
-OUTRAS_DES,Descrição de Outras Drogas,82.01%,Sai,Mais de 82% de dados faltantes (82.01%).
-TRAT_SUPER,Tratamento Diretamente Observado (TDO),71.97%,Sai,Mais de 71% de dados faltantes (71.97%).
-NU_CONTATO,Total de Contatos Registrados,2.42%,Sai,Redundante com contatos examinados (NU_COMU_EX).
-DOENCA_TRA,Doença Relacionada ao Trabalho,65.56%,Sai,Mais de 65% de dados faltantes (65.56%).
-SG_UF_AT,UF de Transferência Atualizada,0.04%,Sai,Vazamento temporal (ocorre durante acompanhamento) e redundante.
-ID_MUNIC_A,Município Atualizado,0.05%,Sai,Vazamento temporal (acompanhamento/transferência).
-DT_NOTI_AT,Data de Notificação Atualizada,25.32%,Sai,Vazamento temporal (acompanhamento/transferência).
-SG_UF_2,Segunda UF de Acompanhamento,16.35%,Sai,Vazamento temporal (acompanhamento/transferência).
-ID_MUNIC_2,Segundo Município de Acompanhamento,16.52%,Sai,Vazamento temporal (acompanhamento/transferência).
-BACILOSC_1,Baciloscopia de Acompanhamento (1º mês),11.84%,Sai,Vazamento temporal (exame realizado durante o acompanhamento clínico).
-BACILOSC_2,Baciloscopia de Acompanhamento (2º mês),13.52%,Sai,Vazamento temporal (exame realizado durante o acompanhamento clínico).
-BACILOSC_3,Baciloscopia de Acompanhamento (3º mês),14.60%,Sai,Vazamento temporal (exame realizado durante o acompanhamento clínico).
-BACILOSC_4,Baciloscopia de Acompanhamento (4º mês),15.43%,Sai,Vazamento temporal (exame realizado durante o acompanhamento clínico).
-BACILOSC_5,Baciloscopia de Acompanhamento (5º mês),16.56%,Sai,Vazamento temporal (exame realizado durante o acompanhamento clínico).
-BACILOSC_6,Baciloscopia de Acompanhamento (6º mês),17.94%,Sai,Vazamento temporal (exame realizado durante o acompanhamento clínico).
-TRATSUP_AT,TDO Atualizado no Acompanhamento,21.51%,Sai,Vazamento temporal (preenchido no decorrer do tratamento).
-DT_MUDANCA,Data de Mudança de Esquema,64.78%,Sai,Vazamento temporal (evento ocorrido durante o acompanhamento) e >64% faltante.
-NU_COMU_EX,Número de Contatos Examinados,7.03%,Fica,Avaliação de busca ativa diagnóstica de contatos intradomiciliares.
-SITUA_9_M,Situação aos 9 Meses,64.84%,Sai,Vazamento temporal (acompanhamento tardio) e >64% faltante.
-SITUA_12_M,Situação aos 12 Meses,91.22%,Sai,Vazamento temporal (acompanhamento tardio) e >91% faltante.
-SITUA_ENCE,Situação de Encerramento,0.00%,Sai,Variável que originou o desfecho alvo (TARGET); nunca entra como atributo.
-DT_ENCERRA,Data de Encerramento do Caso,0.77%,Sai,Vazamento temporal gravíssimo (ocorre no momento do desfecho final).
-TPUNINOT,Tipo de Unidade de Notificação,0.00%,Fica,Perfil do estabelecimento de saúde que atendeu o paciente no diagnóstico.
-POP_LIBER,População Privada de Liberdade,0.00%,Fica,Grupo de alta vulnerabilidade social avaliado na entrada.
-POP_RUA,População em Situação de Rua,0.00%,Fica,Grupo de extrema vulnerabilidade social e risco no diagnóstico.
-POP_SAUDE,Profissional de Saúde,0.00%,Fica,Vulnerabilidade ocupacional avaliada no diagnóstico.
-POP_IMIG,População de Imigrantes,0.00%,Fica,Grupo de vulnerabilidade social avaliado no diagnóstico.
-BENEF_GOV,Beneficiário de Programa Social,0.00%,Fica,Marcador de vulnerabilidade socioeconômica na entrada.
-AGRAVDROGA,Uso de Substâncias Psicoativas Ilícitas,0.00%,Fica,Fator de risco comportamental relevante na admissão.
-AGRAVTABAC,Uso de Tabaco,0.00%,Fica,Fator comportamental agravante pulmonar no diagnóstico.
-TEST_MOLEC,Teste Molecular Rápido (TMR-TB),62.32%,Sai,Mais de 60% de faltantes (62.32%) na série histórica.
-TEST_SENSI,Teste de Sensibilidade Antimicrobiana,84.58%,Sai,Mais de 84% de faltantes (84.58%).
-ANT_RETRO,Terapia Antirretroviral (TARV),81.98%,Sai,Vazamento temporal de acompanhamento e >81% de dados faltantes.
-BAC_APOS_6,Baciloscopia Após 6º Mês,53.24%,Sai,Vazamento temporal (acompanhamento tardio de evolução).
-TRANSF,Transferência Ocorrida,63.45%,Sai,Vazamento temporal de acompanhamento e >63% de faltantes.
-UF_TRANSF,UF de Transferência,97.96%,Sai,Vazamento temporal e >97% de dados faltantes.
-MUN_TRANSF,Município de Transferência,98.59%,Sai,Vazamento temporal e >98% de dados faltantes.
-REGIAO,Macrorregião de Residência,0.00%,Fica,Divisão regional consolidada no diagnóstico.
-IDADEminutos,Idade em Minutos,100.00%,Sai,100% vazia e redundante com IDADE_ANOS.
-IDADEhoras,Idade em Horas,99.93%,Sai,Mais de 99% vazia (>99.93%) e redundante.
-IDADEdias,Idade em Dias,99.86%,Sai,Mais de 99% vazia (>99.85%) e redundante.
-IDADEmeses,Idade em Meses,99.80%,Sai,Mais de 99% vazia (>99.78%) e redundante.
-IDADEanos,Idade em Anos (bruta),0.55%,Sai,Redundante com a idade tratada IDADE_ANOS.
-IDADE,Idade Consolidada Anterior,0.13%,Sai,Substituída pela conversão padronizada de NU_IDADE_N (IDADE_ANOS).
-FAIXA_ETARIA,Faixa Etária,0.04%,Sai,Redundante com a idade contínua IDADE_ANOS.
-CAPITAL,Indicador de Residência em Capital,64.69%,Sai,Mais de 64% de dados faltantes (64.69%) e redundante com município/UF.
-CRITERIO_LABORATORIAL,Critério de Confirmação Diagnóstica,0.00%,Fica,Classificação de entrada entre confirmação laboratorial ou clínica.
-ANO,Ano Compilado,0.00%,Sai,Substituído pela derivação direta de data do diagnóstico (ANO_DIAG).
+﻿Atributo,Significado,Qtd Faltantes,% Faltantes,Decisão,Motivo
+TP_NOT,Tipo de Notificação,0,0.00%,Sai,Constante (>99% código 2 - Notificação Individual).
+ID_AGRAVO,Código do Agravo (CID-10),0,0.00%,Sai,Constante (>99% código A169 - Tuberculose pulmonar).
+DT_NOTIFIC,Data de Notificação,0,0.00%,Sai,Redundante/Administrativa; informação temporal representada por ANO_DIAG.
+NU_ANO,Ano da Notificação,0,0.00%,Sai,Redundante com o ano de diagnóstico (ANO_DIAG).
+SG_UF_NOT,UF da Unidade Notificadora,0,0.00%,Sai,Redundante com a UF de residência do paciente (SG_UF).
+ID_MUNICIP,Município de Notificação,0,0.00%,Sai,Alta cardinalidade (>5.200 municípios); agrupado em SG_UF e REGIAO.
+ID_REGIONA,Regional de Saúde Notificadora,241201,27.28%,Sai,Alta cardinalidade e redundante com SG_UF e REGIAO.
+DT_DIAG,Data de Diagnóstico,0,0.00%,Sai,Substituída pela variável derivada ANO_DIAG (ano do diagnóstico).
+ANO_NASC,Ano de Nascimento,5643,0.64%,Sai,Redundante com a idade contínua calculada em anos (IDADE_ANOS).
+NU_IDADE_N,Idade Codificada do SINAN,221,0.02%,Sai,Substituída pela variável contínua corrigida IDADE_ANOS.
+CS_SEXO,Sexo Biológico do Paciente,0,0.00%,Fica,Atributo demográfico essencial disponível no momento do diagnóstico.
+CS_GESTANT,Estado Gestacional,13791,1.56%,Sai,"Mais de 60% de perda de informação (>74%), pois >69% da base é masculina (""Não se aplica"")."
+CS_RACA,Raça/Cor Autodeclarada,11849,1.34%,Fica,Determinante social de saúde relevante no momento do diagnóstico.
+CS_ESCOL_N,Nível de Escolaridade,46028,5.21%,Fica,Marcador socioeconômico importante no momento do diagnóstico.
+SG_UF,UF de Residência,0,0.00%,Fica,Localização geográfica agregada (agrupamento do município).
+ID_MN_RESI,Município de Residência,0,0.00%,Sai,Alta cardinalidade; agrupado em UF (SG_UF) e Região (REGIAO).
+ID_RG_RESI,Regional de Residência,242647,27.44%,Sai,Redundante com UF e Região de residência.
+ID_PAIS,País de Residência,200330,22.66%,Sai,Quase constante (>99% Brasil) e redundante.
+NDUPLIC_N,Indicador de Duplicidade,530627,60.01%,Sai,Mais de 60% de faltantes (60.01%) e dado puramente administrativo.
+IN_VINCULA,Vínculo de Notificação,538436,60.89%,Sai,Mais de 60% de faltantes (60.89%) e dado de fluxo do sistema sem relevância clínica preditiva.
+DT_DIGITA,Data de Digitação no Sistema,424781,48.04%,Sai,Dado operacional administrativo; mais de 48% de dados faltantes (48.04%).
+DT_TRANSUS,Data de Transição SUS,853704,96.55%,Sai,Mais de 96% de dados faltantes (96.55%).
+DT_TRANSDM,Data de Transição Municipal,874738,98.93%,Sai,Mais de 98% de dados faltantes (98.93%).
+DT_TRANSSM,Data de Transição Estadual,591975,66.95%,Sai,Mais de 66% de dados faltantes (66.95%).
+DT_TRANSRM,Data de Transição Regional,884221,100.00%,Sai,100% de dados faltantes (884.221 nulos).
+DT_TRANSRS,Data de Transição Regional Saúde,872564,98.68%,Sai,Mais de 98% de dados faltantes (98.68%).
+DT_TRANSSE,Data de Transição Setorial,694423,78.54%,Sai,Mais de 78% de dados faltantes (78.54%).
+CS_FLXRET,Fluxo de Retorno,884221,100.00%,Sai,100% de dados faltantes (884.221 nulos).
+FLXRECEBI,Fluxo de Recebimento,884221,100.00%,Sai,100% de dados faltantes (884.221 nulos).
+MIGRADO_W,Indicador de Migração Windows,590958,66.83%,Sai,Mais de 66% de dados faltantes (66.83%).
+ID_OCUPA_N,Ocupação do Paciente,708283,80.10%,Sai,Mais de 80% de faltantes (80.10%) e alta cardinalidade textual.
+TRATAMENTO,Tipo de Tratamento,0,0.00%,Fica,"Histórico clínico essencial na entrada (caso novo, recidiva, reingresso)."
+INSTITUCIO,Instituição de Internação,590932,66.83%,Sai,Mais de 66% de dados faltantes (66.83%).
+RAIOX_TORA,Radiografia de Tórax,10851,1.23%,Fica,Exame de imagem padrão na entrada diagnóstica.
+TESTE_TUBE,Teste Tuberculínico (PPD),590934,66.83%,Sai,Mais de 66% de dados faltantes (66.83%).
+FORMA,Forma Clínica da Tuberculose,0,0.00%,Sai,Constante (100% Pulmonar na base analisada).
+EXTRAPU1_N,Primeira Localização Extrapulmonar,79996,9.05%,Sai,Base restrita a casos pulmonares; irrelevante e redundante.
+EXTRAPU2_N,Segunda Localização Extrapulmonar,590957,66.83%,Sai,Base restrita a casos pulmonares; mais de 66% de faltantes (66.83%).
+EXTRAPUL_O,Outra Localização Extrapulmonar,883569,99.93%,Sai,Base restrita a casos pulmonares; mais de 99% faltante (99.93%).
+AGRAVAIDS,Agravo Associado: AIDS,10208,1.15%,Fica,Comorbidade clínica grave associada ao prognóstico.
+AGRAVALCOO,Agravo Associado: Alcoolismo,8982,1.02%,Fica,Fator de risco comportamental para adesão e resposta terapêutica.
+AGRAVDIABE,Agravo Associado: Diabetes Mellitus,9678,1.09%,Fica,Comorbidade crônica de alto impacto clínico.
+AGRAVDOENC,Agravo Associado: Doença Mental,11613,1.31%,Fica,Fator associado à vulnerabilidade psicossocial e autocuidado.
+AGRAVOUTRA,Outros Agravos Associados,194149,21.96%,Fica,Presença de outras patologias preexistentes no diagnóstico.
+AGRAVOUTDE,Descrição de Outros Agravos,858075,97.04%,Sai,Mais de 97% de dados faltantes (97.04%) e campo textual livre.
+BACILOSC_E,Baciloscopia de Escarro (Diagnóstico),0,0.00%,Fica,Exame laboratorial bacteriológico de entrada no diagnóstico.
+BACILOS_E2,Segunda Baciloscopia de Escarro,590909,66.83%,Sai,Mais de 66% de dados faltantes (66.83%).
+BACILOSC_O,Baciloscopia em Outro Material,463909,52.47%,Sai,Mais de 52% de dados faltantes (52.47%) e exame de segunda linha.
+CULTURA_ES,Cultura de Escarro,0,0.00%,Sai,Mais de 64% de exames não realizados segundo o dicionário de dados do SINAN.
+CULTURA_OU,Cultura em Outro Material,488616,55.26%,Sai,Mais de 55% de strings vazias (55.26%) e >99% de exames não realizados.
+HIV,Resultado da Sorologia para HIV,1791,0.20%,Fica,Principal fator de risco clínico para óbito em tuberculose.
+HISTOPATOL,Exame Histopatológico,44572,5.04%,Sai,Exame invasivo de segunda linha com alta taxa de não realização no SUS.
+DT_INIC_TR,Data de Início do Tratamento,30174,3.41%,Sai,Vazamento temporal / redundante com ano de diagnóstico.
+RIFAMPICIN,Uso de Rifampicina no Esquema,590945,66.83%,Sai,Mais de 66% de dados faltantes (66.83%).
+ISONIAZIDA,Uso de Isoniazida no Esquema,590945,66.83%,Sai,Mais de 66% de dados faltantes (66.83%).
+ETAMBUTOL,Uso de Etambutol no Esquema,590946,66.83%,Sai,Mais de 66% de dados faltantes (66.83%).
+ESTREPTOMI,Uso de Estreptomicina no Esquema,590947,66.83%,Sai,Mais de 66% de dados faltantes (66.83%).
+PIRAZINAMI,Uso de Pirazinamida no Esquema,590946,66.83%,Sai,Mais de 66% de dados faltantes (66.83%).
+ETIONAMIDA,Uso de Etionamida no Esquema,590946,66.83%,Sai,Mais de 66% de dados faltantes (66.83%).
+OUTRAS,Uso de Outras Drogas no Esquema,590947,66.83%,Sai,Mais de 66% de dados faltantes (66.83%).
+OUTRAS_DES,Descrição de Outras Drogas,733357,82.94%,Sai,Mais de 82% de dados faltantes (82.94%).
+TRAT_SUPER,Tratamento Diretamente Observado (TDO),460589,52.09%,Sai,Dado de acompanhamento (TDO) e mais de 52% de faltantes (52.09%).
+NU_CONTATO,Total de Contatos Registrados,18242,2.06%,Sai,Redundante com contatos examinados (NU_COMU_EX).
+DOENCA_TRA,Doença Relacionada ao Trabalho,590931,66.83%,Sai,Mais de 66% de dados faltantes (66.83%).
+SG_UF_AT,UF de Transferência Atualizada,1235,0.14%,Sai,Vazamento temporal (ocorre durante acompanhamento) e redundante.
+ID_MUNIC_A,Município Atualizado,1248,0.14%,Sai,Vazamento temporal (acompanhamento/transferência).
+DT_NOTI_AT,Data de Notificação Atualizada,201731,22.81%,Sai,Vazamento temporal (acompanhamento/transferência; 22.81% faltante).
+SG_UF_2,Segunda UF de Acompanhamento,134885,15.25%,Sai,Vazamento temporal (acompanhamento/transferência).
+ID_MUNIC_2,Segundo Município de Acompanhamento,136382,15.42%,Sai,Vazamento temporal (acompanhamento/transferência).
+BACILOSC_1,Baciloscopia de Acompanhamento (1º mês),155526,17.59%,Sai,Vazamento temporal (exame realizado durante o acompanhamento clínico no 1º mês; 17.59% faltantes).
+BACILOSC_2,Baciloscopia de Acompanhamento (2º mês),184424,20.86%,Sai,Vazamento temporal (exame realizado durante o acompanhamento clínico no 2º mês; 20.86% faltantes).
+BACILOSC_3,Baciloscopia de Acompanhamento (3º mês),206229,23.32%,Sai,Vazamento temporal (exame realizado durante o acompanhamento clínico no 3º mês; 23.32% faltantes).
+BACILOSC_4,Baciloscopia de Acompanhamento (4º mês),225309,25.48%,Sai,Vazamento temporal (exame realizado durante o acompanhamento clínico no 4º mês; 25.48% faltantes).
+BACILOSC_5,Baciloscopia de Acompanhamento (5º mês),243637,27.55%,Sai,Vazamento temporal (exame realizado durante o acompanhamento clínico no 5º mês; 27.55% faltantes).
+BACILOSC_6,Baciloscopia de Acompanhamento (6º mês),261723,29.60%,Sai,Vazamento temporal (exame realizado durante o acompanhamento clínico no 6º mês; 29.60% faltantes).
+TRATSUP_AT,TDO Atualizado no Acompanhamento,127595,14.43%,Sai,Vazamento temporal (preenchido no decorrer do tratamento; 14.43% faltante).
+DT_MUDANCA,Data de Mudança de Esquema,590953,66.83%,Sai,Vazamento temporal (evento ocorrido durante o acompanhamento) e mais de 66% faltante (66.83%).
+NU_COMU_EX,Número de Contatos Examinados,91365,10.33%,Fica,Avaliação de busca ativa diagnóstica de contatos intradomiciliares.
+SITUA_9_M,Situação aos 9 Meses,590887,66.83%,Sai,Vazamento temporal (acompanhamento tardio) e mais de 66% faltante (66.83%).
+SITUA_12_M,Situação aos 12 Meses,810620,91.68%,Sai,Vazamento temporal (acompanhamento tardio) e mais de 91% faltante (91.68%).
+SITUA_ENCE,Situação de Encerramento,28100,3.18%,Sai,Variável que originou o desfecho alvo (TARGET); nunca entra como atributo preditor.
+DT_ENCERRA,Data de Encerramento,39756,4.50%,Sai,Vazamento temporal gravíssimo (ocorre no momento do desfecho final; 4.50% faltante).
+TPUNINOT,Tipo de Unidade Notificadora,205772,23.27%,Fica,Perfil do estabelecimento de saúde que atendeu o paciente no diagnóstico.
+POP_LIBER,População Privada de Liberdade,12126,1.37%,Fica,Grupo de alta vulnerabilidade social avaliado na entrada.
+POP_RUA,População em Situação de Rua,13894,1.57%,Fica,Grupo de extrema vulnerabilidade social e risco no diagnóstico.
+POP_SAUDE,Profissional de Saúde,14170,1.60%,Fica,Vulnerabilidade ocupacional avaliada no diagnóstico.
+POP_IMIG,População Imigrante,14917,1.69%,Fica,Grupo de vulnerabilidade social avaliado no diagnóstico.
+BENEF_GOV,Beneficiário de Programa de Transferência de Renda,153480,17.36%,Fica,Marcador de vulnerabilidade socioeconômica na entrada.
+AGRAVDROGA,Agravo Associado: Drogas Ilícitas,11476,1.30%,Fica,Fator de risco comportamental relevante na admissão.
+AGRAVTABAC,Agravo Associado: Tabagismo,11678,1.32%,Fica,Fator comportamental agravante pulmonar no diagnóstico.
+TEST_MOLEC,Teste Rápido Molecular (TRM-TB),34882,3.94%,Sai,Introduzido tardiamente na série histórica; redundante com confirmação bacteriológica.
+TEST_SENSI,Teste de Sensibilidade Antimicrobiana,271334,30.69%,Sai,Mais de 30% de strings vazias na base bruta (30.69%) e >84% não realizados no acompanhamento.
+ANT_RETRO,Terapia Antirretroviral (TARV),458137,51.81%,Sai,Vazamento temporal de acompanhamento e mais de 51% de dados faltantes (51.81%).
+BAC_APOS_6,Baciloscopia Após 6º Mês,452915,51.22%,Sai,Vazamento temporal (acompanhamento tardio de evolução; 51.22% faltante).
+TRANSF,Caso Transferido,548366,62.02%,Sai,Vazamento temporal de acompanhamento e mais de 62% de faltantes (62.02%).
+UF_TRANSF,UF de Transferência,840008,95.00%,Sai,Vazamento temporal e mais de 94% de dados faltantes (95.00%).
+MUN_TRANSF,Município de Transferência,848289,95.94%,Sai,Vazamento temporal e mais de 95% de dados faltantes (95.94%).
+REGIAO,Macrorregião de Residência,0,0.00%,Fica,Divisão regional consolidada no diagnóstico.
+IDADEminutos,Idade em Minutos,884221,100.00%,Sai,100% vazia (884.221 nulos) e redundante com IDADE_ANOS.
+IDADEhoras,Idade em Horas,883658,99.94%,Sai,Mais de 99% vazia (99.94%) e redundante.
+IDADEdias,Idade em Dias,882903,99.85%,Sai,Mais de 99% vazia (99.85%) e redundante.
+IDADEmeses,Idade em Meses,882269,99.78%,Sai,Mais de 99% vazia (99.78%) e redundante.
+IDADEanos,Idade em Anos (bruta),4117,0.47%,Sai,Redundante com a idade tratada IDADE_ANOS.
+IDADE,Idade Consolidada Anterior,284,0.03%,Sai,Substituída pela conversão padronizada de NU_IDADE_N (IDADE_ANOS).
+FAIXA_ETARIA,Faixa Etária,284,0.03%,Sai,Redundante com a idade contínua IDADE_ANOS.
+CAPITAL,Indicador de Residência em Capital,550784,62.29%,Sai,Mais de 62% de dados faltantes (62.29%) e redundante com município/UF.
+CRITERIO_LABORATORIAL,Critério de Confirmação Diagnóstica,0,0.00%,Fica,Classificação de entrada entre confirmação laboratorial ou clínica.
+ANO,Ano Compilado,0,0.00%,Sai,Substituído pela derivação direta de data do diagnóstico (ANO_DIAG).
